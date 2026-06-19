@@ -154,8 +154,10 @@
 <!-- グループの曲データを動的に読み込み（キャッシュ回避のtoms付き） -->
 <script>
   window.GKEY = (new URLSearchParams(location.search).get("group") || "jj").toLowerCase();
-  if(!/^(jj|mm|ag|tf|by|on|rc)$/.test(window.GKEY)) window.GKEY = "jj";
-  document.write('<script src="songs-' + window.GKEY + '.js?t=' + Date.now() + '"><\/script>');
+  if(!/^(jj|mm|ag|tf|by|on|rc|mix)$/.test(window.GKEY)) window.GKEY = "jj";
+  window.MIX_KEYS = ["mm","ag","jj","tf","by","on","rc"]; // MIXに含める現役グループ
+  var _load = (window.GKEY === "mix") ? window.MIX_KEYS : [window.GKEY];
+  _load.forEach(function(k){ document.write('<script src="songs-' + k + '.js?t=' + Date.now() + '"><\/script>'); });
 </script>
 <script>
 /* ===== グループ設定（名前・アクセント色） ===== */
@@ -167,13 +169,22 @@ const GROUP_META = {
   by:{ name:"BEYOOOOONDS", color:"#2bb673" },   // 緑
   on:{ name:"OCHA NORMA",  color:"#eaa524" },   // 黄（暫定）
   rc:{ name:"ロージークロニクル", color:"#d6336c" }, // ローズ（暫定）
+  mix:{ name:"全グループMIX", color:"#f5a623" }, // 現役全部ミックス
 };
 const KEY = window.GKEY;
 const META = GROUP_META[KEY] || GROUP_META.jj;
 document.getElementById("group-name").textContent = META.name;
 document.documentElement.style.setProperty("--main", META.color);
-// 曲データ
-const SONGS = window["SONGS_" + KEY.toUpperCase()] || [];
+// 曲データ（MIXは現役全グループを結合。タイトル重複は除去）
+let SONGS;
+if (KEY === "mix") {
+  const all = [].concat(...window.MIX_KEYS.map((k) => window["SONGS_" + k.toUpperCase()] || []));
+  const seen = new Set();
+  SONGS = all.filter((s) => { if (seen.has(s.title)) return false; seen.add(s.title); return true; });
+  SONGS = shuffle(SONGS); // グループ順の偏りをなくす
+} else {
+  SONGS = window["SONGS_" + KEY.toUpperCase()] || [];
+}
 
 /* ===== 設定値 ===== */
 const MAX_POINTS=1000, MIN_POINTS=200, DECAY_PER_SEC=80, ANSWER_TIME=5, GRACE_MS=1500;
