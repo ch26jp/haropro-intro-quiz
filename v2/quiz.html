@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<title>ハロプロ 頭文字あてクイズ（β）</title>
+<style>
+  :root{
+    --main:#e4007f; --main-dark:#b00063;
+    --bg:#1a1024; --panel:#2a1838; --text:#fff; --sub:#c9b6d6;
+    --good:#22c55e; --bad:#ef4444;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:radial-gradient(circle at top,#3a1f50,var(--bg));
+    color:var(--text);min-height:100vh;
+    display:flex;justify-content:center;align-items:flex-start;
+    -webkit-text-size-adjust:100%;
+  }
+  #app{width:100%;max-width:520px;padding:max(14px,env(safe-area-inset-top)) 16px calc(50px + env(safe-area-inset-bottom));}
+  .backbar{display:flex;align-items:center;margin:2px 0 6px;}
+  .backlink{color:var(--sub);text-decoration:none;font-size:.85rem;background:rgba(255,255,255,.06);padding:7px 12px;border-radius:999px;}
+  .backlink:active{transform:scale(.96);}
+  h1{text-align:center;font-size:1.25rem;margin:6px 0 2px;}
+  h1 .accent{color:var(--main);}
+  .beta{font-size:.62em;opacity:.85;background:var(--main);color:#fff;border-radius:6px;padding:1px 6px;vertical-align:middle;}
+  .subtitle{text-align:center;color:var(--sub);font-size:.82rem;margin-bottom:18px;}
+  .card{background:var(--panel);border-radius:16px;padding:22px 18px;box-shadow:0 8px 30px rgba(0,0,0,.4);}
+  .hidden{display:none !important;}
+  button{font-family:inherit;cursor:pointer;border:none;border-radius:12px;font-weight:bold;transition:transform .08s,filter .15s;}
+  button:active{transform:scale(.97);}
+  .btn-primary{background:var(--main);color:#fff;font-size:1.1rem;padding:16px;width:100%;}
+  .count-row{display:flex;gap:10px;margin:18px 0 22px;}
+  .count-btn{flex:1;background:#3a2550;color:var(--text);padding:18px 0;font-size:1.2rem;border:2px solid transparent;}
+  .count-btn.selected{border-color:var(--main);background:#4a2d66;}
+  .count-btn small{display:block;font-size:.7rem;color:var(--sub);font-weight:normal;margin-top:4px;}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:.9rem;color:var(--sub);}
+  .topbar .score{color:var(--main);font-weight:bold;font-size:1.1rem;}
+  .streak-badge{text-align:center;font-weight:bold;font-size:.95rem;color:#ffd700;background:rgba(255,140,0,.15);border:1px solid rgba(255,140,0,.5);border-radius:999px;padding:6px 10px;margin-bottom:12px;animation:pulse 1s infinite;}
+  .streak-badge #streak-mult{color:var(--main);}
+  #confetti-layer{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:50;}
+  .confetti{position:absolute;top:-30px;animation:fall 1.4s ease-in forwards;}
+  @keyframes fall{to{transform:translateY(110vh) rotate(360deg);opacity:.2;}}
+  #combo-flash{position:fixed;left:0;right:0;top:38%;text-align:center;z-index:60;pointer-events:none;font-size:2rem;font-weight:bold;color:#ffd700;text-shadow:0 0 14px rgba(255,140,0,.9);animation:comboPop .9s ease-out forwards;}
+  @keyframes comboPop{0%{transform:scale(.4);opacity:0;}25%{transform:scale(1.15);opacity:1;}70%{transform:scale(1);opacity:1;}100%{transform:scale(1.05);opacity:0;}}
+  .gauge-wrap{margin:8px 0 18px;}
+  .gauge-label{display:flex;justify-content:space-between;font-size:.8rem;color:var(--sub);margin-bottom:4px;}
+  .gauge-bg{background:#1a1024;border-radius:999px;height:16px;overflow:hidden;}
+  .gauge-fill{height:100%;background:linear-gradient(90deg,var(--main),#ff7ac1);width:100%;transition:width .1s linear;}
+  .player-area{position:relative;margin-bottom:18px;min-height:80px;background:#241636;border-radius:12px;overflow:hidden;}
+  .cover{position:absolute;left:0;top:0;bottom:0;right:var(--play-gap,92px);background:#241636;border-radius:12px 0 0 12px;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:5;text-align:center;padding:12px;}
+  #cover-title{color:var(--sub);font-size:.9rem;animation:pulse 1.3s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+  .play-hint{position:absolute;right:0;top:0;bottom:0;width:var(--play-gap,92px);z-index:6;display:flex;align-items:center;justify-content:flex-end;padding-right:var(--play-btn-right,10px);background:#241636;border-radius:0 12px 12px 0;pointer-events:none;}
+  .play-fake{width:28px;height:28px;border-radius:50%;background:var(--main);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.95rem;padding-left:2px;box-shadow:0 0 0 4px rgba(228,0,127,.25);transform:translateY(var(--play-btn-down,12px));}
+  .buzz-btn{background:var(--main);color:#fff;font-size:1.5rem;padding:26px;width:100%;border-radius:16px;box-shadow:0 6px 0 var(--main-dark);}
+  .buzz-btn:active{box-shadow:0 2px 0 var(--main-dark);transform:translateY(4px);}
+  .answer-timer{text-align:center;font-size:1.4rem;font-weight:bold;margin-bottom:8px;}
+  .answer-timer.warn{color:var(--bad);}
+  /* 頭文字あて：解答の進捗表示 */
+  .relay-progress{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:6px;}
+  .slot{min-width:40px;height:48px;border-radius:8px;background:#1a1024;border:2px solid #3a2550;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:bold;padding:0 6px;}
+  .slot.filled{background:var(--main);border-color:#fff;}
+  .slot.more{border:none;background:transparent;color:var(--sub);font-size:1.2rem;min-width:24px;}
+  .relay-hint{text-align:center;color:var(--sub);font-size:.85rem;margin-bottom:12px;}
+  /* 文字の選択肢（4つ・2x2） */
+  .char-choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .char-btn{background:#3a2550;color:var(--text);padding:20px;font-size:1.7rem;border:2px solid transparent;}
+  .char-btn:active{background:#4a2d66;}
+  .result-msg{text-align:center;font-size:1.5rem;font-weight:bold;margin-bottom:8px;}
+  .result-msg.ok{color:var(--good);} .result-msg.ng{color:var(--bad);}
+  .result-song{text-align:center;color:var(--sub);margin-bottom:8px;}
+  .result-song b{color:var(--text);font-size:1.1rem;}
+  .result-note{text-align:center;color:var(--sub);font-size:.8rem;margin-bottom:14px;}
+  .gain{text-align:center;color:var(--main);font-weight:bold;margin-bottom:16px;}
+  .final-score{text-align:center;font-size:3rem;color:var(--main);font-weight:bold;}
+  .final-label{text-align:center;color:var(--sub);margin-bottom:6px;}
+  .final-detail{text-align:center;margin:14px 0 20px;}
+  .rank{text-align:center;font-size:1.3rem;margin-bottom:18px;}
+  .qfoot{margin-top:22px;color:var(--sub);font-size:.66rem;line-height:1.7;text-align:center;opacity:.85;}
+  .qfoot a{color:#9ad;}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="backbar"><a class="backlink" href="index.html">← グループ選択</a></div>
+  <h1><span class="accent" id="group-name">ハロプロ</span> 頭文字あてクイズ <span class="beta">β</span></h1>
+  <div class="subtitle">流れた曲名を、頭文字から1文字ずつ当てよう！</div>
+
+  <!-- スタート -->
+  <div id="screen-start" class="card">
+    <p style="text-align:center;margin-top:0;">出題数を選んでスタート</p>
+    <div class="count-row">
+      <button class="count-btn" data-count="5">5<small>曲</small></button>
+      <button class="count-btn selected" data-count="10">10<small>曲</small></button>
+      <button class="count-btn" data-count="15">15<small>曲</small></button>
+    </div>
+    <button id="start-btn" class="btn-primary">▶ スタート</button>
+    <p style="font-size:.75rem;color:var(--sub);text-align:center;margin-bottom:0;line-height:1.8;">
+      早押し後、<b style="color:#fff;">曲名の頭文字から1文字ずつ</b>、4択で当てていきます。<br>
+      最初の数文字を全部当てれば正解！1文字でも間違えると不正解です。
+    </p>
+  </div>
+
+  <!-- クイズ -->
+  <div id="screen-quiz" class="card hidden">
+    <div class="topbar">
+      <span id="q-progress">第1問 / 全10問</span>
+      <span class="score">SCORE <span id="q-score">0</span></span>
+    </div>
+    <div class="streak-badge hidden" id="streak-badge">🔥 <span id="streak-count">0</span>連続　<span id="streak-mult">x1.0</span></div>
+    <div class="gauge-wrap" id="gauge-wrap">
+      <div class="gauge-label"><span id="gauge-name">この問題の獲得ポイント</span><span id="gauge-points">1000</span></div>
+      <div class="gauge-bg"><div class="gauge-fill" id="gauge-fill"></div></div>
+    </div>
+    <div class="player-area">
+      <div id="spotify-embed"></div>
+      <div class="cover" id="cover"><span id="cover-title">▶ で再生 →</span></div>
+      <div class="play-hint" id="play-hint"><span class="play-fake">▶</span></div>
+    </div>
+    <div id="phase-buzz"><button class="buzz-btn" id="buzz-btn">🔔 早押し！</button></div>
+    <!-- 頭文字あての解答フェーズ -->
+    <div id="phase-answer" class="hidden">
+      <div class="answer-timer" id="answer-timer">5</div>
+      <div class="relay-progress" id="relay-progress"></div>
+      <div class="relay-hint" id="relay-hint">1文字目は？</div>
+      <div class="char-choices" id="choices"></div>
+    </div>
+    <div id="phase-result" class="hidden">
+      <div class="result-msg" id="result-msg"></div>
+      <div class="result-song">正解は <b id="result-title"></b></div>
+      <div class="result-note" id="result-note"></div>
+      <div class="gain" id="result-gain"></div>
+      <button class="btn-primary" id="next-btn">次へ ▶</button>
+    </div>
+  </div>
+
+  <div id="confetti-layer"></div>
+  <div id="combo-flash" class="hidden"></div>
+
+  <div class="qfoot">
+    非公式・非営利のファンコンテンツです。Hello! Project・各グループ・Spotify とは関係ありません（非公認）。<br>
+    再生は <a href="https://www.spotify.com/" target="_blank" rel="noopener">Spotify</a> の公式プレーヤーを利用。権利は各権利者に帰属します。 ／ <a href="../index.html">通常版へ</a>
+  </div>
+
+  <!-- 結果 -->
+  <div id="screen-end" class="card hidden">
+    <div class="final-label">最終スコア</div>
+    <div class="final-score" id="final-score">0</div>
+    <div class="rank" id="final-rank"></div>
+    <div class="final-detail" id="final-detail"></div>
+    <button class="btn-primary" id="retry-btn" style="margin-bottom:10px;">もう一度遊ぶ</button>
+    <a class="backlink" href="index.html" style="display:block;text-align:center;">← 別のグループを選ぶ</a>
+  </div>
+</div>
+
+<!-- Spotify IFrame API -->
+<script src="https://open.spotify.com/embed/iframe-api/v1" async></script>
+<!-- 曲データは親フォルダのものを再利用（タイムスタンプでキャッシュ回避） -->
+<script>
+  window.GKEY = (new URLSearchParams(location.search).get("group") || "jj").toLowerCase();
+  if(!/^(jj|mm|ag|tf|by|on|rc|mix)$/.test(window.GKEY)) window.GKEY = "jj";
+  window.MIX_KEYS = ["mm","ag","jj","tf","by","on","rc"];
+  var _load = (window.GKEY === "mix") ? window.MIX_KEYS : [window.GKEY];
+  _load.forEach(function(k){ document.write('<script src="../songs-' + k + '.js?t=' + Date.now() + '"><\/script>'); });
+</script>
+<script>
+/* ===== グループ設定 ===== */
+const GROUP_META = {
+  jj:{ name:"Juice=Juice", color:"#7e3eb1" },
+  mm:{ name:"モーニング娘。", color:"#e60026" },
+  ag:{ name:"アンジュルム",   color:"#0079c1" },
+  tf:{ name:"つばきファクトリー", color:"#f15a9c" },
+  by:{ name:"BEYOOOOONDS", color:"#2bb673" },
+  on:{ name:"OCHA NORMA",  color:"#EA851A" },
+  rc:{ name:"ロージークロニクル", color:"#F0CC16" },
+  mix:{ name:"全グループMIX", color:"#f5a623" },
+};
+const KEY = window.GKEY;
+const META = GROUP_META[KEY] || GROUP_META.jj;
+document.getElementById("group-name").textContent = META.name;
+document.documentElement.style.setProperty("--main", META.color);
+let SONGS;
+if (KEY === "mix") {
+  const all = [].concat(...window.MIX_KEYS.map((k) => window["SONGS_" + k.toUpperCase()] || []));
+  const seen = new Set();
+  SONGS = all.filter((s) => { if (seen.has(s.title)) return false; seen.add(s.title); return true; });
+  SONGS = shuffle(SONGS);
+} else {
+  SONGS = window["SONGS_" + KEY.toUpperCase()] || [];
+}
+
+/* ===== 設定値 ===== */
+const MAX_POINTS=1000, MIN_POINTS=200, DECAY_PER_SEC=80, GRACE_MS=1500;
+const TARGET_LEN=6;   // 頭から何文字当てれば正解か（曲名が短ければその長さまで）
+const CHAR_TIME=5;    // 1文字あたりの制限時間（秒）
+
+/* ===== 状態 ===== */
+let questions=[], current=0, totalScore=0, questionCount=10;
+let decayTimer=null, curPoints=MAX_POINTS, answerTimer=null, answered=false, waitingForPlay=false;
+let streak=0, correctCount=0;
+let spotifyController=null;
+// 頭文字あて用
+let relayChars=[], relayN=0, relayPos=0;
+let CHAR_POOL=[]; // 全曲タイトルの文字（頻度つき）
+
+function show(id){document.getElementById(id).classList.remove("hidden");}
+function hide(id){document.getElementById(id).classList.add("hidden");}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+/* ===== 効果音 ===== */
+let audioCtx=null;
+function initAudio(){ if(!audioCtx){try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}} if(audioCtx&&audioCtx.state==="suspended")audioCtx.resume(); }
+function tone(freq,start,dur,type="sine",vol=0.22){ if(!audioCtx)return; const t0=audioCtx.currentTime+start; const o=audioCtx.createOscillator(),g=audioCtx.createGain(); o.type=type;o.frequency.value=freq; g.gain.setValueAtTime(0.0001,t0); g.gain.linearRampToValueAtTime(vol,t0+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t0+dur); o.connect(g);g.connect(audioCtx.destination); o.start(t0);o.stop(t0+dur+0.05); }
+function playCorrectSound(s){ const base=523.25,arp=[0,4,7,12,16]; const n=Math.min(arp.length,2+Math.floor(s/2)); for(let i=0;i<n;i++) tone(base*Math.pow(2,arp[i]/12),i*0.08,0.18,"triangle",0.25); }
+function playWrongSound(){ tone(160,0,0.22,"sawtooth",0.18); tone(110,0.09,0.3,"sawtooth",0.18); }
+function playTick(){ tone(880,0,0.06,"square",0.12); } // 1文字正解の小気味よい音
+
+/* ===== 演出 ===== */
+function burstConfetti(){ const em=["🎉","✨","🎵","💖","⭐"]; const layer=document.getElementById("confetti-layer"); for(let i=0;i<26;i++){const s=document.createElement("span");s.className="confetti";s.textContent=em[Math.floor(Math.random()*em.length)];s.style.left=Math.random()*100+"%";s.style.animationDelay=Math.random()*0.25+"s";s.style.fontSize=16+Math.random()*18+"px";layer.appendChild(s);setTimeout(()=>s.remove(),1700);} }
+function comboFlash(s,mult){ const el=document.getElementById("combo-flash"); el.textContent=`🔥 ${s} COMBO!  x${(+mult.toFixed(2))}`; el.classList.remove("hidden"); el.style.animation="none"; void el.offsetWidth; el.style.animation=""; setTimeout(()=>el.classList.add("hidden"),900); }
+
+/* ===== ストリーク ===== */
+function streakMultiplier(s){ if(s<2)return 1.0; return Math.min(1.3,1.0+0.05*(s-1)); }
+function updateStreakBadge(){ const b=document.getElementById("streak-badge"); if(streak>=2){b.classList.remove("hidden");document.getElementById("streak-count").textContent=streak;document.getElementById("streak-mult").textContent="x"+(+streakMultiplier(streak).toFixed(2));}else{b.classList.add("hidden");} }
+
+/* ===== 文字プール（全タイトルの文字を頻度つきで集める） ===== */
+function buildCharPool(){
+  CHAR_POOL=[];
+  for(const s of SONGS){ for(const ch of Array.from(s.title)){ if(!/\s/.test(ch)) CHAR_POOL.push(ch); } }
+}
+// 正解文字と重複しないダミー文字をn個
+function pickDistractorChars(correct,n){
+  const out=[]; const used=new Set([correct]); let guard=0;
+  while(out.length<n && guard++<500){
+    const c=CHAR_POOL[Math.floor(Math.random()*CHAR_POOL.length)];
+    if(!used.has(c)){ used.add(c); out.push(c); }
+  }
+  // 万一足りない時の保険
+  const fallback="あいうえおかきくけこさしすせそ".split("");
+  for(const c of fallback){ if(out.length>=n)break; if(!used.has(c)){used.add(c);out.push(c);} }
+  return out;
+}
+
+/* ===== Spotify ===== */
+window.onSpotifyIframeApiReady=(IFrameAPI)=>{
+  const el=document.getElementById("spotify-embed");
+  const opt={uri:(SONGS[0]?SONGS[0].uri:""),width:"100%",height:"80"};
+  IFrameAPI.createController(el,opt,(c)=>{
+    spotifyController=c; window.spotifyController=c;
+    c.addListener("playback_update",(e)=>{ if(!e||!e.data)return; if(waitingForPlay && e.data.isPaused===false){ waitingForPlay=false; onPlaybackStarted(); } });
+  });
+};
+function onPlaybackStarted(){
+  document.getElementById("cover-title").style.display="none";
+  const hint=document.getElementById("play-hint"); hint.querySelector(".play-fake").style.display="none";
+  const buzz=document.getElementById("buzz-btn"); buzz.disabled=false; buzz.style.opacity="1";
+  startDecay();
+}
+
+/* ===== 出題数選択 ===== */
+document.querySelectorAll(".count-btn").forEach(btn=>{ btn.addEventListener("click",()=>{ document.querySelectorAll(".count-btn").forEach(b=>b.classList.remove("selected")); btn.classList.add("selected"); questionCount=parseInt(btn.dataset.count,10); }); });
+
+/* ===== 開始 ===== */
+document.getElementById("start-btn").addEventListener("click",()=>{
+  if(!SONGS||SONGS.length===0){alert("曲データが読み込めませんでした。");return;}
+  initAudio(); buildCharPool();
+  questions=shuffle(SONGS).slice(0,questionCount);
+  current=0; totalScore=0; streak=0; correctCount=0; updateStreakBadge();
+  hide("screen-start"); show("screen-quiz"); loadQuestion();
+});
+
+function loadQuestion(){
+  answered=false; waitingForPlay=true; curPoints=MAX_POINTS; clearInterval(decayTimer);
+  document.getElementById("q-progress").textContent=`第${current+1}問 / 全${questions.length}問`;
+  document.getElementById("q-score").textContent=totalScore;
+  document.getElementById("gauge-points").textContent=MAX_POINTS;
+  document.getElementById("gauge-fill").style.width="100%";
+  document.getElementById("cover").style.display="flex";
+  document.getElementById("cover-title").style.display="block";
+  const hint=document.getElementById("play-hint"); hint.style.display="flex"; hint.querySelector(".play-fake").style.display="flex";
+  const buzz=document.getElementById("buzz-btn"); buzz.disabled=true; buzz.style.opacity="0.4";
+  show("phase-buzz"); hide("phase-answer"); hide("phase-result"); show("gauge-wrap");
+  if(spotifyController){ try{spotifyController.loadUri(questions[current].uri);}catch(e){} }
+}
+
+function startDecay(){
+  clearInterval(decayTimer); const startTime=Date.now();
+  const nameEl=document.getElementById("gauge-name"), fillEl=document.getElementById("gauge-fill");
+  nameEl.textContent="この問題の獲得ポイント";
+  decayTimer=setInterval(()=>{
+    const sec=Math.max(0,(Date.now()-startTime-GRACE_MS)/1000);
+    curPoints=Math.max(MIN_POINTS,Math.round(MAX_POINTS-sec*DECAY_PER_SEC));
+    document.getElementById("gauge-points").textContent=curPoints;
+    fillEl.style.width=((curPoints-MIN_POINTS)/(MAX_POINTS-MIN_POINTS)*100)+"%";
+  },100);
+}
+
+/* ===== 早押し → 頭文字あて開始 ===== */
+document.getElementById("buzz-btn").addEventListener("click",()=>{
+  if(waitingForPlay)return;
+  clearInterval(decayTimer);
+  if(spotifyController){try{spotifyController.pause();}catch(e){}}
+  hide("phase-buzz"); show("phase-answer"); startRelay();
+});
+
+function startRelay(){
+  const title=questions[current].title;
+  relayChars=Array.from(title).filter(ch=>!/\s/.test(ch)); // 空白は飛ばす
+  relayN=Math.min(TARGET_LEN, relayChars.length);
+  relayPos=0;
+  renderRelay();
+}
+
+function renderRelay(){
+  // 進捗（当てた文字＋これからの枠）
+  const prog=document.getElementById("relay-progress"); prog.innerHTML="";
+  for(let i=0;i<relayN;i++){
+    const d=document.createElement("div");
+    if(i<relayPos){ d.className="slot filled"; d.textContent=relayChars[i]; }
+    else { d.className="slot"; d.textContent=""; }
+    prog.appendChild(d);
+  }
+  if(relayChars.length>relayN){ const m=document.createElement("div"); m.className="slot more"; m.textContent="…"; prog.appendChild(m); }
+  document.getElementById("relay-hint").textContent=`${relayPos+1}文字目は？`;
+
+  // 文字の選択肢（正解＋ダミー3）
+  const correct=relayChars[relayPos];
+  const opts=shuffle([correct,...pickDistractorChars(correct,3)]);
+  const box=document.getElementById("choices"); box.innerHTML="";
+  opts.forEach(ch=>{ const b=document.createElement("button"); b.className="char-btn"; b.textContent=ch; b.addEventListener("click",()=>pickChar(ch)); box.appendChild(b); });
+
+  startCharTimer();
+}
+
+function startCharTimer(){
+  let remain=CHAR_TIME; const el=document.getElementById("answer-timer"); el.textContent=remain; el.classList.remove("warn");
+  clearInterval(answerTimer);
+  answerTimer=setInterval(()=>{ remain--; el.textContent=remain; if(remain<=2)el.classList.add("warn"); if(remain<=0){ clearInterval(answerTimer); if(!answered) finishAnswer(false); } },1000);
+}
+
+function pickChar(ch){
+  if(answered)return;
+  clearInterval(answerTimer);
+  if(ch===relayChars[relayPos]){
+    relayPos++;
+    if(relayPos>=relayN){ finishAnswer(true); }
+    else { playTick(); renderRelay(); }   // 次の文字へ
+  } else {
+    finishAnswer(false); // 1文字でも間違えたら不正解
+  }
+}
+
+function finishAnswer(isCorrect){
+  if(answered)return; answered=true; clearInterval(answerTimer);
+  let gain=0,mult=1;
+  if(isCorrect){ correctCount++; streak++; mult=streakMultiplier(streak); gain=Math.round(curPoints*mult); totalScore+=gain; playCorrectSound(streak); }
+  else { streak=0; playWrongSound(); }
+  setTimeout(()=>showResult(isCorrect,gain,mult),700);
+}
+
+function showResult(isCorrect,gain,mult){
+  hide("phase-answer"); hide("gauge-wrap"); show("phase-result");
+  const msg=document.getElementById("result-msg"); msg.textContent=isCorrect?"⭕ 正解！":"❌ 不正解…"; msg.className="result-msg "+(isCorrect?"ok":"ng");
+  document.getElementById("result-title").textContent=questions[current].title;
+  document.getElementById("result-note").textContent= isCorrect ? "" : `（${relayPos+1}文字目をミス）`;
+  document.getElementById("result-gain").textContent=isCorrect?(`+${gain} ポイント`+(mult>1?`（x${(+mult.toFixed(2))} コンボ！）`:"")):"+0 ポイント";
+  document.getElementById("q-score").textContent=totalScore;
+  if(isCorrect){ burstConfetti(); if(streak>=2)comboFlash(streak,mult); }
+  updateStreakBadge();
+  document.getElementById("cover").style.display="none";
+  document.getElementById("play-hint").style.display="none";
+}
+
+document.getElementById("next-btn").addEventListener("click",()=>{
+  if(spotifyController){try{spotifyController.pause();}catch(e){}}
+  current++;
+  if(current>=questions.length)endGame(); else loadQuestion();
+});
+
+function endGame(){
+  hide("screen-quiz"); show("screen-end");
+  const total=questions.length;
+  document.getElementById("final-score").textContent=totalScore;
+  document.getElementById("final-detail").textContent=`全${total}問中 ${correctCount}問 正解`;
+  const rate=correctCount/total; let rank;
+  if(rate>=0.9)rank="🏆 ハロプロ博士！"; else if(rate>=0.7)rank="🌟 かなりのファン！"; else if(rate>=0.4)rank="🎵 まずまず！"; else rank="🔰 これから覚えよう！";
+  document.getElementById("final-rank").textContent=rank;
+}
+
+document.getElementById("retry-btn").addEventListener("click",()=>{ hide("screen-end"); show("screen-start"); });
+</script>
+</body>
+</html>
