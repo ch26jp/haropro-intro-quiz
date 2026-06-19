@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<title>ハロプロ イントロクイズ</title>
+<style>
+  :root{
+    --main:#e4007f; --main-dark:#b00063;
+    --bg:#1a1024; --panel:#2a1838; --text:#fff; --sub:#c9b6d6;
+    --good:#22c55e; --bad:#ef4444;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:radial-gradient(circle at top,#3a1f50,var(--bg));
+    color:var(--text);min-height:100vh;
+    display:flex;justify-content:center;align-items:flex-start;
+    -webkit-text-size-adjust:100%;
+  }
+  #app{width:100%;max-width:520px;padding:max(14px,env(safe-area-inset-top)) 16px calc(50px + env(safe-area-inset-bottom));}
+  .backbar{display:flex;align-items:center;margin:2px 0 6px;}
+  .backlink{color:var(--sub);text-decoration:none;font-size:.85rem;background:rgba(255,255,255,.06);padding:7px 12px;border-radius:999px;}
+  .backlink:active{transform:scale(.96);}
+  h1{text-align:center;font-size:1.3rem;margin:6px 0 2px;}
+  h1 .accent{color:var(--main);}
+  .subtitle{text-align:center;color:var(--sub);font-size:.82rem;margin-bottom:18px;}
+  .card{background:var(--panel);border-radius:16px;padding:22px 18px;box-shadow:0 8px 30px rgba(0,0,0,.4);}
+  .hidden{display:none !important;}
+  button{font-family:inherit;cursor:pointer;border:none;border-radius:12px;font-weight:bold;transition:transform .08s,filter .15s;}
+  button:active{transform:scale(.97);}
+  .btn-primary{background:var(--main);color:#fff;font-size:1.1rem;padding:16px;width:100%;}
+  .count-row{display:flex;gap:10px;margin:18px 0 22px;}
+  .count-btn{flex:1;background:#3a2550;color:var(--text);padding:18px 0;font-size:1.2rem;border:2px solid transparent;}
+  .count-btn.selected{border-color:var(--main);background:#4a2d66;}
+  .count-btn small{display:block;font-size:.7rem;color:var(--sub);font-weight:normal;margin-top:4px;}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:.9rem;color:var(--sub);}
+  .topbar .score{color:var(--main);font-weight:bold;font-size:1.1rem;}
+  .streak-badge{text-align:center;font-weight:bold;font-size:.95rem;color:#ffd700;background:rgba(255,140,0,.15);border:1px solid rgba(255,140,0,.5);border-radius:999px;padding:6px 10px;margin-bottom:12px;animation:pulse 1s infinite;}
+  .streak-badge #streak-mult{color:var(--main);}
+  #confetti-layer{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:50;}
+  .confetti{position:absolute;top:-30px;animation:fall 1.4s ease-in forwards;}
+  @keyframes fall{to{transform:translateY(110vh) rotate(360deg);opacity:.2;}}
+  #combo-flash{position:fixed;left:0;right:0;top:38%;text-align:center;z-index:60;pointer-events:none;font-size:2rem;font-weight:bold;color:#ffd700;text-shadow:0 0 14px rgba(255,140,0,.9);animation:comboPop .9s ease-out forwards;}
+  @keyframes comboPop{0%{transform:scale(.4);opacity:0;}25%{transform:scale(1.15);opacity:1;}70%{transform:scale(1);opacity:1;}100%{transform:scale(1.05);opacity:0;}}
+  .gauge-wrap{margin:8px 0 18px;}
+  .gauge-label{display:flex;justify-content:space-between;font-size:.8rem;color:var(--sub);margin-bottom:4px;}
+  .gauge-bg{background:#1a1024;border-radius:999px;height:16px;overflow:hidden;}
+  .gauge-fill{height:100%;background:linear-gradient(90deg,var(--main),#ff7ac1);width:100%;transition:width .1s linear;}
+  .player-area{position:relative;margin-bottom:18px;min-height:80px;background:#241636;border-radius:12px;overflow:hidden;}
+  .cover{position:absolute;left:0;top:0;bottom:0;right:var(--play-gap,92px);background:#241636;border-radius:12px 0 0 12px;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:5;text-align:center;padding:12px;}
+  #cover-title{color:var(--sub);font-size:.9rem;animation:pulse 1.3s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+  .play-hint{position:absolute;right:0;top:0;bottom:0;width:var(--play-gap,92px);z-index:6;display:flex;align-items:center;justify-content:flex-end;padding-right:var(--play-btn-right,10px);background:#241636;border-radius:0 12px 12px 0;pointer-events:none;}
+  .play-fake{width:28px;height:28px;border-radius:50%;background:var(--main);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.95rem;padding-left:2px;box-shadow:0 0 0 4px rgba(228,0,127,.25);transform:translateY(var(--play-btn-down,12px));}
+  .buzz-btn{background:var(--main);color:#fff;font-size:1.5rem;padding:26px;width:100%;border-radius:16px;box-shadow:0 6px 0 var(--main-dark);}
+  .buzz-btn:active{box-shadow:0 2px 0 var(--main-dark);transform:translateY(4px);}
+  .answer-timer{text-align:center;font-size:1.4rem;font-weight:bold;margin-bottom:12px;}
+  .answer-timer.warn{color:var(--bad);}
+  .choices{display:flex;flex-direction:column;gap:10px;}
+  .choice{background:#3a2550;color:var(--text);padding:16px;font-size:1rem;text-align:left;border:2px solid transparent;}
+  .choice.correct{background:var(--good);border-color:#fff;}
+  .choice.wrong{background:var(--bad);border-color:#fff;}
+  .choice:disabled{cursor:default;}
+  .result-msg{text-align:center;font-size:1.5rem;font-weight:bold;margin-bottom:8px;}
+  .result-msg.ok{color:var(--good);} .result-msg.ng{color:var(--bad);}
+  .result-song{text-align:center;color:var(--sub);margin-bottom:14px;}
+  .result-song b{color:var(--text);font-size:1.1rem;}
+  .gain{text-align:center;color:var(--main);font-weight:bold;margin-bottom:16px;}
+  .final-score{text-align:center;font-size:3rem;color:var(--main);font-weight:bold;}
+  .final-label{text-align:center;color:var(--sub);margin-bottom:6px;}
+  .final-detail{text-align:center;margin:14px 0 20px;}
+  .rank{text-align:center;font-size:1.3rem;margin-bottom:18px;}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="backbar"><a class="backlink" href="index.html">← グループ選択</a></div>
+  <h1><span class="accent" id="group-name">ハロプロ</span> イントロクイズ</h1>
+  <div class="subtitle">流れた曲を当てよう！ 早く押すほど高得点</div>
+
+  <!-- スタート -->
+  <div id="screen-start" class="card">
+    <p style="text-align:center;margin-top:0;">出題数を選んでスタート</p>
+    <div class="count-row">
+      <button class="count-btn" data-count="5">5<small>曲</small></button>
+      <button class="count-btn selected" data-count="10">10<small>曲</small></button>
+      <button class="count-btn" data-count="15">15<small>曲</small></button>
+    </div>
+    <button id="start-btn" class="btn-primary">▶ スタート</button>
+    <p style="font-size:.75rem;color:var(--sub);text-align:center;margin-bottom:0;line-height:1.8;">
+      ※ 各問、プレーヤーの<b style="color:#fff;">▶ボタンを押す</b>と曲が流れます（約30秒）。<br>
+      🔊 <b style="color:#fff;">音が大きいとき</b>はスマホ/PCの音量を下げてください。
+    </p>
+  </div>
+
+  <!-- クイズ -->
+  <div id="screen-quiz" class="card hidden">
+    <div class="topbar">
+      <span id="q-progress">第1問 / 全10問</span>
+      <span class="score">SCORE <span id="q-score">0</span></span>
+    </div>
+    <div class="streak-badge hidden" id="streak-badge">🔥 <span id="streak-count">0</span>連続　<span id="streak-mult">x1.0</span></div>
+    <div class="gauge-wrap" id="gauge-wrap">
+      <div class="gauge-label"><span id="gauge-name">この問題の獲得ポイント</span><span id="gauge-points">1000</span></div>
+      <div class="gauge-bg"><div class="gauge-fill" id="gauge-fill"></div></div>
+    </div>
+    <div class="player-area">
+      <div id="spotify-embed"></div>
+      <div class="cover" id="cover"><span id="cover-title">▶ で再生 →</span></div>
+      <div class="play-hint" id="play-hint"><span class="play-fake">▶</span></div>
+    </div>
+    <div id="phase-buzz"><button class="buzz-btn" id="buzz-btn">🔔 早押し！</button></div>
+    <div id="phase-answer" class="hidden">
+      <div class="answer-timer" id="answer-timer">5</div>
+      <div class="choices" id="choices"></div>
+    </div>
+    <div id="phase-result" class="hidden">
+      <div class="result-msg" id="result-msg"></div>
+      <div class="result-song">正解は <b id="result-title"></b></div>
+      <div class="gain" id="result-gain"></div>
+      <button class="btn-primary" id="next-btn">次へ ▶</button>
+    </div>
+  </div>
+
+  <div id="confetti-layer"></div>
+  <div id="combo-flash" class="hidden"></div>
+
+  <!-- 結果 -->
+  <div id="screen-end" class="card hidden">
+    <div class="final-label">最終スコア</div>
+    <div class="final-score" id="final-score">0</div>
+    <div class="rank" id="final-rank"></div>
+    <div class="final-detail" id="final-detail"></div>
+    <button class="btn-primary" id="retry-btn" style="margin-bottom:10px;">もう一度遊ぶ</button>
+    <a class="backlink" href="index.html" style="display:block;text-align:center;">← 別のグループを選ぶ</a>
+  </div>
+</div>
+
+<!-- Spotify IFrame API -->
+<script src="https://open.spotify.com/embed/iframe-api/v1" async></script>
+<!-- グループの曲データを動的に読み込み（キャッシュ回避のtoms付き） -->
+<script>
+  window.GKEY = (new URLSearchParams(location.search).get("group") || "jj").toLowerCase();
+  if(!/^(jj|mm|ag|tf)$/.test(window.GKEY)) window.GKEY = "jj";
+  document.write('<script src="songs-' + window.GKEY + '.js?t=' + Date.now() + '"><\/script>');
+</script>
+<script>
+/* ===== グループ設定（名前・アクセント色） ===== */
+const GROUP_META = {
+  jj:{ name:"Juice=Juice", color:"#e4007f" },
+  mm:{ name:"モーニング娘。", color:"#ec407a" },
+  ag:{ name:"アンジュルム",   color:"#1e88e5" },
+  tf:{ name:"つばきファクトリー", color:"#2e9e5b" },
+};
+const KEY = window.GKEY;
+const META = GROUP_META[KEY] || GROUP_META.jj;
+document.getElementById("group-name").textContent = META.name;
+document.documentElement.style.setProperty("--main", META.color);
+// 曲データ
+const SONGS = window["SONGS_" + KEY.toUpperCase()] || [];
+
+/* ===== 設定値 ===== */
+const MAX_POINTS=1000, MIN_POINTS=200, DECAY_PER_SEC=80, ANSWER_TIME=5, GRACE_MS=1500;
+
+/* ===== 状態 ===== */
+let questions=[], current=0, totalScore=0, questionCount=10;
+let decayTimer=null, curPoints=MAX_POINTS, answerTimer=null, answered=false, waitingForPlay=false;
+let streak=0, correctCount=0;
+let spotifyController=null;
+
+function show(id){document.getElementById(id).classList.remove("hidden");}
+function hide(id){document.getElementById(id).classList.add("hidden");}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+/* ===== 効果音（Web Audio） ===== */
+let audioCtx=null;
+function initAudio(){ if(!audioCtx){try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}} if(audioCtx&&audioCtx.state==="suspended")audioCtx.resume(); }
+function tone(freq,start,dur,type="sine",vol=0.22){ if(!audioCtx)return; const t0=audioCtx.currentTime+start; const o=audioCtx.createOscillator(),g=audioCtx.createGain(); o.type=type;o.frequency.value=freq; g.gain.setValueAtTime(0.0001,t0); g.gain.linearRampToValueAtTime(vol,t0+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t0+dur); o.connect(g);g.connect(audioCtx.destination); o.start(t0);o.stop(t0+dur+0.05); }
+function playCorrectSound(s){ const base=523.25,arp=[0,4,7,12,16]; const n=Math.min(arp.length,2+Math.floor(s/2)); for(let i=0;i<n;i++) tone(base*Math.pow(2,arp[i]/12),i*0.08,0.18,"triangle",0.25); }
+function playWrongSound(){ tone(160,0,0.22,"sawtooth",0.18); tone(110,0.09,0.3,"sawtooth",0.18); }
+
+/* ===== 演出 ===== */
+function burstConfetti(){ const em=["🎉","✨","🎵","💖","⭐"]; const layer=document.getElementById("confetti-layer"); for(let i=0;i<26;i++){const s=document.createElement("span");s.className="confetti";s.textContent=em[Math.floor(Math.random()*em.length)];s.style.left=Math.random()*100+"%";s.style.animationDelay=Math.random()*0.25+"s";s.style.fontSize=16+Math.random()*18+"px";layer.appendChild(s);setTimeout(()=>s.remove(),1700);} }
+function comboFlash(s,mult){ const el=document.getElementById("combo-flash"); el.textContent=`🔥 ${s} COMBO!  x${(+mult.toFixed(2))}`; el.classList.remove("hidden"); el.style.animation="none"; void el.offsetWidth; el.style.animation=""; setTimeout(()=>el.classList.add("hidden"),900); }
+
+/* ===== ストリーク ===== */
+function streakMultiplier(s){ if(s<2)return 1.0; return Math.min(1.3,1.0+0.05*(s-1)); }
+function updateStreakBadge(){ const b=document.getElementById("streak-badge"); if(streak>=2){b.classList.remove("hidden");document.getElementById("streak-count").textContent=streak;document.getElementById("streak-mult").textContent="x"+(+streakMultiplier(streak).toFixed(2));}else{b.classList.add("hidden");} }
+
+/* ===== Spotify ===== */
+window.onSpotifyIframeApiReady=(IFrameAPI)=>{
+  const el=document.getElementById("spotify-embed");
+  const opt={uri:(SONGS[0]?SONGS[0].uri:""),width:"100%",height:"80"};
+  IFrameAPI.createController(el,opt,(c)=>{
+    spotifyController=c; window.spotifyController=c;
+    c.addListener("playback_update",(e)=>{ if(!e||!e.data)return; if(waitingForPlay && e.data.isPaused===false){ waitingForPlay=false; onPlaybackStarted(); } });
+  });
+};
+function onPlaybackStarted(){
+  document.getElementById("cover-title").style.display="none";
+  const hint=document.getElementById("play-hint"); hint.querySelector(".play-fake").style.display="none";
+  const buzz=document.getElementById("buzz-btn"); buzz.disabled=false; buzz.style.opacity="1";
+  startDecay();
+}
+
+/* ===== 出題数選択 ===== */
+document.querySelectorAll(".count-btn").forEach(btn=>{ btn.addEventListener("click",()=>{ document.querySelectorAll(".count-btn").forEach(b=>b.classList.remove("selected")); btn.classList.add("selected"); questionCount=parseInt(btn.dataset.count,10); }); });
+
+/* ===== 開始 ===== */
+document.getElementById("start-btn").addEventListener("click",()=>{
+  if(!SONGS||SONGS.length===0){alert("曲データが読み込めませんでした。");return;}
+  initAudio();
+  questions=shuffle(SONGS).slice(0,questionCount);
+  current=0; totalScore=0; streak=0; correctCount=0; updateStreakBadge();
+  hide("screen-start"); show("screen-quiz"); loadQuestion();
+});
+
+function loadQuestion(){
+  answered=false; waitingForPlay=true; curPoints=MAX_POINTS; clearInterval(decayTimer);
+  document.getElementById("q-progress").textContent=`第${current+1}問 / 全${questions.length}問`;
+  document.getElementById("q-score").textContent=totalScore;
+  document.getElementById("gauge-points").textContent=MAX_POINTS;
+  document.getElementById("gauge-fill").style.width="100%";
+  document.getElementById("cover").style.display="flex";
+  document.getElementById("cover-title").style.display="block";
+  const hint=document.getElementById("play-hint"); hint.style.display="flex"; hint.querySelector(".play-fake").style.display="flex";
+  const buzz=document.getElementById("buzz-btn"); buzz.disabled=true; buzz.style.opacity="0.4";
+  show("phase-buzz"); hide("phase-answer"); hide("phase-result"); show("gauge-wrap");
+  if(spotifyController){ try{spotifyController.loadUri(questions[current].uri);}catch(e){} }
+}
+
+function startDecay(){
+  clearInterval(decayTimer); const startTime=Date.now();
+  const nameEl=document.getElementById("gauge-name"), fillEl=document.getElementById("gauge-fill");
+  nameEl.textContent="この問題の獲得ポイント";
+  decayTimer=setInterval(()=>{
+    const sec=Math.max(0,(Date.now()-startTime-GRACE_MS)/1000);
+    curPoints=Math.max(MIN_POINTS,Math.round(MAX_POINTS-sec*DECAY_PER_SEC));
+    document.getElementById("gauge-points").textContent=curPoints;
+    fillEl.style.width=((curPoints-MIN_POINTS)/(MAX_POINTS-MIN_POINTS)*100)+"%";
+  },100);
+}
+
+document.getElementById("buzz-btn").addEventListener("click",()=>{
+  if(waitingForPlay)return;
+  clearInterval(decayTimer);
+  if(spotifyController){try{spotifyController.pause();}catch(e){}}
+  hide("phase-buzz"); show("phase-answer"); showChoices(); startAnswerTimer();
+});
+
+function showChoices(){
+  const song=questions[current];
+  const others=SONGS.filter(s=>s.title!==song.title);
+  const wrong=shuffle(others).slice(0,3).map(s=>s.title);
+  const options=shuffle([song.title,...wrong]);
+  const box=document.getElementById("choices"); box.innerHTML="";
+  options.forEach(title=>{ const b=document.createElement("button"); b.className="choice"; b.textContent=title; b.addEventListener("click",()=>selectAnswer(title,b)); box.appendChild(b); });
+}
+
+function startAnswerTimer(){
+  let remain=ANSWER_TIME; const el=document.getElementById("answer-timer"); el.textContent=remain; el.classList.remove("warn");
+  clearInterval(answerTimer);
+  answerTimer=setInterval(()=>{ remain--; el.textContent=remain; if(remain<=2)el.classList.add("warn"); if(remain<=0){clearInterval(answerTimer); if(!answered)selectAnswer(null,null);} },1000);
+}
+
+function selectAnswer(title,btnEl){
+  if(answered)return; answered=true; clearInterval(answerTimer);
+  const song=questions[current]; const isCorrect=title===song.title;
+  document.querySelectorAll(".choice").forEach(b=>{ b.disabled=true; if(b.textContent===song.title)b.classList.add("correct"); else if(b===btnEl)b.classList.add("wrong"); });
+  let gain=0,mult=1;
+  if(isCorrect){ correctCount++; streak++; mult=streakMultiplier(streak); gain=Math.round(curPoints*mult); totalScore+=gain; playCorrectSound(streak); }
+  else { streak=0; playWrongSound(); }
+  setTimeout(()=>showResult(isCorrect,gain,mult),900);
+}
+
+function showResult(isCorrect,gain,mult){
+  hide("phase-answer"); hide("gauge-wrap"); show("phase-result");
+  const msg=document.getElementById("result-msg"); msg.textContent=isCorrect?"⭕ 正解！":"❌ 不正解…"; msg.className="result-msg "+(isCorrect?"ok":"ng");
+  document.getElementById("result-title").textContent=questions[current].title;
+  document.getElementById("result-gain").textContent=isCorrect?(`+${gain} ポイント`+(mult>1?`（x${(+mult.toFixed(2))} コンボ！）`:"")):"+0 ポイント";
+  document.getElementById("q-score").textContent=totalScore;
+  if(isCorrect){ burstConfetti(); if(streak>=2)comboFlash(streak,mult); }
+  updateStreakBadge();
+  document.getElementById("cover").style.display="none";
+  document.getElementById("play-hint").style.display="none";
+}
+
+document.getElementById("next-btn").addEventListener("click",()=>{
+  if(spotifyController){try{spotifyController.pause();}catch(e){}}
+  current++;
+  if(current>=questions.length)endGame(); else loadQuestion();
+});
+
+function endGame(){
+  hide("screen-quiz"); show("screen-end");
+  const total=questions.length;
+  document.getElementById("final-score").textContent=totalScore;
+  document.getElementById("final-detail").textContent=`全${total}問中 ${correctCount}問 正解`;
+  const rate=correctCount/total; let rank;
+  if(rate>=0.9)rank="🏆 ハロプロ博士！"; else if(rate>=0.7)rank="🌟 かなりのファン！"; else if(rate>=0.4)rank="🎵 まずまず！"; else rank="🔰 これから覚えよう！";
+  document.getElementById("final-rank").textContent=rank;
+}
+
+document.getElementById("retry-btn").addEventListener("click",()=>{ hide("screen-end"); show("screen-start"); });
+</script>
+</body>
+</html>

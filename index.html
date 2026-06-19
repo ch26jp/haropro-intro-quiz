@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<title>ハロプロ イントロクイズ</title>
+<style>
+  :root{
+    --bg:#150c20; --panel:#241636; --text:#fff; --sub:#c9b6d6;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:radial-gradient(circle at 50% 0%, #3a1f50, var(--bg));
+    color:var(--text); min-height:100vh;
+    padding:max(24px,env(safe-area-inset-top)) 18px calc(40px + env(safe-area-inset-bottom));
+    -webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:560px;margin:0 auto;}
+  h1{text-align:center;font-size:1.5rem;margin:8px 0 2px;line-height:1.3;}
+  .lead{text-align:center;color:var(--sub);font-size:.85rem;margin-bottom:26px;}
+  /* グループ選択カード（大きくタップしやすく） */
+  .cards{display:flex;flex-direction:column;gap:14px;}
+  .card{
+    display:flex;align-items:center;gap:14px;
+    text-decoration:none;color:var(--text);
+    background:var(--panel);
+    border-radius:18px;padding:20px 18px;
+    border:2px solid transparent;
+    box-shadow:0 6px 20px rgba(0,0,0,.35);
+    transition:transform .08s, border-color .15s;
+  }
+  .card:active{transform:scale(.98);}
+  .card .ic{
+    width:54px;height:54px;border-radius:14px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.6rem;font-weight:bold;color:#fff;
+  }
+  .card .tx{flex:1;min-width:0;}
+  .card .nm{font-size:1.15rem;font-weight:bold;}
+  .card .ds{font-size:.78rem;color:var(--sub);margin-top:3px;}
+  .card .go{color:var(--sub);font-size:1.3rem;}
+  .footer{text-align:center;color:var(--sub);font-size:.72rem;margin-top:28px;line-height:1.7;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🎧 ハロプロ<br>イントロクイズ</h1>
+  <div class="lead">グループを選んでスタート！流れた曲を当てよう</div>
+
+  <div class="cards" id="cards"></div>
+
+  <div class="footer">
+    Spotifyの試聴（約30秒）を利用しています。<br>
+    曲はプレーヤーの▶を押すと流れます。スマホ・PCどちらでも遊べます。
+  </div>
+</div>
+
+<script>
+  // グループ定義（キー・名前・色・説明）
+  const GROUPS = [
+    { key:"jj", name:"Juice=Juice",        color:"#e4007f", desc:"62曲・デビュー曲〜最新まで" },
+    { key:"mm", name:"モーニング娘。",        color:"#ec407a", desc:"代表曲〜最新まで網羅" },
+    { key:"ag", name:"アンジュルム",          color:"#1e88e5", desc:"改名後（ANGERME）の楽曲" },
+    { key:"tf", name:"つばきファクトリー",     color:"#2e9e5b", desc:"デビュー曲〜最新まで" },
+  ];
+  const box = document.getElementById("cards");
+  GROUPS.forEach(g=>{
+    const a = document.createElement("a");
+    a.className = "card";
+    a.href = "quiz.html?group=" + g.key;
+    a.innerHTML =
+      '<div class="ic" style="background:'+g.color+'">♪</div>'+
+      '<div class="tx"><div class="nm">'+g.name+'</div><div class="ds">'+g.desc+'</div></div>'+
+      '<div class="go">▶</div>';
+    box.appendChild(a);
+  });
+</script>
+</body>
+</html>
