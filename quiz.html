@@ -179,6 +179,7 @@ const MAX_POINTS=1000, MIN_POINTS=200, DECAY_PER_SEC=80, ANSWER_TIME=5, GRACE_MS
 let questions=[], current=0, totalScore=0, questionCount=10;
 let decayTimer=null, curPoints=MAX_POINTS, answerTimer=null, answered=false, waitingForPlay=false;
 let streak=0, correctCount=0;
+let questionTitles=new Set(); // このセットで出題する曲（選択肢の重複防止に使う）
 let spotifyController=null;
 
 function show(id){document.getElementById(id).classList.remove("hidden");}
@@ -224,6 +225,7 @@ document.getElementById("start-btn").addEventListener("click",()=>{
   if(!SONGS||SONGS.length===0){alert("曲データが読み込めませんでした。");return;}
   initAudio();
   questions=shuffle(SONGS).slice(0,questionCount);
+  questionTitles=new Set(questions.map(q=>q.title));
   current=0; totalScore=0; streak=0; correctCount=0; updateStreakBadge();
   hide("screen-start"); show("screen-quiz"); loadQuestion();
 });
@@ -263,8 +265,10 @@ document.getElementById("buzz-btn").addEventListener("click",()=>{
 
 function showChoices(){
   const song=questions[current];
-  const others=SONGS.filter(s=>s.title!==song.title);
-  const wrong=shuffle(others).slice(0,3).map(s=>s.title);
+  // ダミー選択肢は「このセットで出題される曲」を除外（同じ曲が二度見えないように）
+  let others=SONGS.filter(s=>!questionTitles.has(s.title));
+  if(others.length<4) others=SONGS.filter(s=>s.title!==song.title); // 足りない時は通常
+  const wrong=shuffle(others).slice(0,4).map(s=>s.title); // 4ダミー＋正解＝5択
   const options=shuffle([song.title,...wrong]);
   const box=document.getElementById("choices"); box.innerHTML="";
   options.forEach(title=>{ const b=document.createElement("button"); b.className="choice"; b.textContent=title; b.addEventListener("click",()=>selectAnswer(title,b)); box.appendChild(b); });
