@@ -154,7 +154,7 @@
 <!-- グループの曲データを動的に読み込み（キャッシュ回避のtoms付き） -->
 <script>
   window.GKEY = (new URLSearchParams(location.search).get("group") || "jj").toLowerCase();
-  if(!/^(jj|mm|ag|tf)$/.test(window.GKEY)) window.GKEY = "jj";
+  if(!/^(jj|mm|ag|tf|by|on|rc)$/.test(window.GKEY)) window.GKEY = "jj";
   document.write('<script src="songs-' + window.GKEY + '.js?t=' + Date.now() + '"><\/script>');
 </script>
 <script>
@@ -164,6 +164,9 @@ const GROUP_META = {
   mm:{ name:"モーニング娘。", color:"#e60026" }, // 赤（慣例）
   ag:{ name:"アンジュルム",   color:"#0079c1" }, // 青
   tf:{ name:"つばきファクトリー", color:"#f15a9c" }, // ピンク
+  by:{ name:"BEYOOOOONDS", color:"#2bb673" },   // 緑
+  on:{ name:"OCHA NORMA",  color:"#eaa524" },   // 黄（暫定）
+  rc:{ name:"ロージークロニクル", color:"#d6336c" }, // ローズ（暫定）
 };
 const KEY = window.GKEY;
 const META = GROUP_META[KEY] || GROUP_META.jj;
