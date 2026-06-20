@@ -50,7 +50,8 @@
 
 <script>
   const GROUPS = [
-    { key:"mix", name:"🎲 全グループMIX", color:"linear-gradient(135deg,#e60026,#EA851A,#2bb673,#0079c1,#7e3eb1)", desc:"現役7グループから出題！腕試しに" },
+    { key:"all", name:"🌈 全グループシャッフル", color:"linear-gradient(135deg,#e60026,#EA851A,#F0CC16,#2bb673,#0079c1,#7e3eb1,#d81b60)", desc:"OG含む全11グループから出題！" },
+    { key:"mix", name:"🎲 現役グループシャッフル", color:"linear-gradient(135deg,#e60026,#EA851A,#2bb673,#0079c1,#7e3eb1)", desc:"現役7グループから出題！" },
     { key:"mm", name:"モーニング娘。",        color:"#e60026", desc:"代表曲〜最新まで網羅" },
     { key:"ag", name:"アンジュルム",          color:"#0079c1", desc:"改名後（ANGERME）の楽曲" },
     { key:"jj", name:"Juice=Juice",        color:"#7e3eb1", desc:"デビュー曲〜最新まで" },
@@ -58,6 +59,10 @@
     { key:"by", name:"BEYOOOOONDS",        color:"#2bb673", desc:"デビュー曲〜最新まで" },
     { key:"on", name:"OCHA NORMA",         color:"#EA851A", desc:"デビュー曲〜最新まで" },
     { key:"rc", name:"ロージークロニクル",     color:"#F0CC16", desc:"デビュー曲〜最新まで" },
+    { key:"cu", name:"℃-ute",              color:"#d81b60", desc:"OG・代表曲を網羅" },
+    { key:"bz", name:"Berryz工房",          color:"#00bcd4", desc:"OG・代表曲を網羅" },
+    { key:"cg", name:"カントリー・ガールズ",   color:"#c0883e", desc:"OG・代表曲を網羅" },
+    { key:"kf", name:"こぶしファクトリー",     color:"#3f51b5", desc:"OG・代表曲を網羅" },
   ];
   const box = document.getElementById("cards");
   GROUPS.forEach(g=>{

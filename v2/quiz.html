@@ -164,9 +164,10 @@
 <!-- 曲データは親フォルダのものを再利用（タイムスタンプでキャッシュ回避） -->
 <script>
   window.GKEY = (new URLSearchParams(location.search).get("group") || "jj").toLowerCase();
-  if(!/^(jj|mm|ag|tf|by|on|rc|mix)$/.test(window.GKEY)) window.GKEY = "jj";
+  if(!/^(jj|mm|ag|tf|by|on|rc|cu|bz|cg|kf|mix|all)$/.test(window.GKEY)) window.GKEY = "jj";
   window.MIX_KEYS = ["mm","ag","jj","tf","by","on","rc"];
-  var _load = (window.GKEY === "mix") ? window.MIX_KEYS : [window.GKEY];
+  window.ALL_KEYS = window.MIX_KEYS.concat(["cu","bz","cg","kf"]);
+  var _load = (window.GKEY === "mix") ? window.MIX_KEYS : (window.GKEY === "all") ? window.ALL_KEYS : [window.GKEY];
   _load.forEach(function(k){ document.write('<script src="../songs-' + k + '.js?t=' + Date.now() + '"><\/script>'); });
 </script>
 <script>
@@ -179,17 +180,23 @@ const GROUP_META = {
   by:{ name:"BEYOOOOONDS", color:"#2bb673" },
   on:{ name:"OCHA NORMA",  color:"#EA851A" },
   rc:{ name:"ロージークロニクル", color:"#F0CC16" },
-  mix:{ name:"全グループMIX", color:"#f5a623" },
+  cu:{ name:"℃-ute", color:"#d81b60" },
+  bz:{ name:"Berryz工房", color:"#00bcd4" },
+  cg:{ name:"カントリー・ガールズ", color:"#c0883e" },
+  kf:{ name:"こぶしファクトリー", color:"#3f51b5" },
+  mix:{ name:"現役グループシャッフル", color:"#f5a623" },
+  all:{ name:"全グループシャッフル", color:"#b388ff" },
 };
 const KEY = window.GKEY;
 const META = GROUP_META[KEY] || GROUP_META.jj;
 document.getElementById("group-name").textContent = META.name;
 document.documentElement.style.setProperty("--main", META.color);
 let SONGS;
-if (KEY === "mix") {
-  const all = [].concat(...window.MIX_KEYS.map((k) => window["SONGS_" + k.toUpperCase()] || []));
+if (KEY === "mix" || KEY === "all") {
+  const keys = (KEY === "all") ? window.ALL_KEYS : window.MIX_KEYS;
+  const merged = [].concat(...keys.map((k) => window["SONGS_" + k.toUpperCase()] || []));
   const seen = new Set();
-  SONGS = all.filter((s) => { if (seen.has(s.title)) return false; seen.add(s.title); return true; });
+  SONGS = merged.filter((s) => { if (seen.has(s.title)) return false; seen.add(s.title); return true; });
   SONGS = shuffle(SONGS);
 } else {
   SONGS = window["SONGS_" + KEY.toUpperCase()] || [];
