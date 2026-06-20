@@ -207,7 +207,9 @@ let streak=0, correctCount=0;
 let spotifyController=null;
 // 頭文字あて用
 let relayChars=[], relayN=0, relayPos=0;
-let CHAR_POOL=[]; // 全曲タイトルの文字（頻度つき）
+let CHAR_POOL=[];    // 全曲タイトルの文字（頻度つき・フォールバック用）
+let FIRST_CHARS=[];  // 各曲の1文字目（頻度つき）
+let TRANS={};        // 直前の文字 → 次に実際に来た文字の配列（頻度つき）
 
 function show(id){document.getElementById(id).classList.remove("hidden");}
 function hide(id){document.getElementById(id).classList.add("hidden");}
@@ -229,21 +231,44 @@ function comboFlash(s,mult){ const el=document.getElementById("combo-flash"); el
 function streakMultiplier(s){ if(s<2)return 1.0; return Math.min(1.3,1.0+0.05*(s-1)); }
 function updateStreakBadge(){ const b=document.getElementById("streak-badge"); if(streak>=2){b.classList.remove("hidden");document.getElementById("streak-count").textContent=streak;document.getElementById("streak-mult").textContent="x"+(+streakMultiplier(streak).toFixed(2));}else{b.classList.add("hidden");} }
 
-/* ===== 文字プール（全タイトルの文字を頻度つきで集める） ===== */
+/* ===== 文字プール構築 =====
+   ・CHAR_POOL: 全文字（フォールバック用）
+   ・FIRST_CHARS: 各曲の1文字目（1文字目の選択肢用）
+   ・TRANS: 直前の文字→次に実際に来た文字（2文字目以降を自然な並びにする） */
 function buildCharPool(){
-  CHAR_POOL=[];
-  for(const s of SONGS){ for(const ch of Array.from(s.title)){ if(!/\s/.test(ch)) CHAR_POOL.push(ch); } }
-}
-// 正解文字と重複しないダミー文字をn個
-function pickDistractorChars(correct,n){
-  const out=[]; const used=new Set([correct]); let guard=0;
-  while(out.length<n && guard++<500){
-    const c=CHAR_POOL[Math.floor(Math.random()*CHAR_POOL.length)];
-    if(!used.has(c)){ used.add(c); out.push(c); }
+  CHAR_POOL=[]; FIRST_CHARS=[]; TRANS={};
+  for(const s of SONGS){
+    const cs=Array.from(s.title).filter(c=>!/\s/.test(c));
+    if(cs.length) FIRST_CHARS.push(cs[0]);
+    for(let i=0;i<cs.length;i++){
+      CHAR_POOL.push(cs[i]);
+      if(i>0){ const p=cs[i-1]; (TRANS[p]||(TRANS[p]=[])).push(cs[i]); }
+    }
   }
-  // 万一足りない時の保険
-  const fallback="あいうえおかきくけこさしすせそ".split("");
-  for(const c of fallback){ if(out.length>=n)break; if(!used.has(c)){used.add(c);out.push(c);} }
+}
+// 見分けにくい文字をまとめるためのキー（大文字小文字・L/I/1・O/0 などを同一視）
+function confusKey(ch){
+  const c=ch.toLowerCase();
+  const look={ "0":"o","o":"o","ο":"o","〇":"o","ｏ":"o",
+               "1":"l","l":"l","i":"l","|":"l","ｌ":"l","ｉ":"l","１":"l" };
+  return look[c] || c;
+}
+// 正解と「紛らわしくない」ダミー文字をn個。候補(candidates)優先→全文字でフォールバック
+function pickDistractorChars(correct,n,candidates){
+  const out=[]; const usedKeys=new Set([confusKey(correct)]);
+  const drawFrom=(pool)=>{
+    if(!pool||!pool.length)return; let guard=0;
+    while(out.length<n && guard++<800){
+      const c=pool[Math.floor(Math.random()*pool.length)];
+      const k=confusKey(c);
+      if(!usedKeys.has(k)){ usedKeys.add(k); out.push(c); }
+    }
+  };
+  drawFrom(candidates);   // まず文脈に合う候補（自然な並び）
+  drawFrom(CHAR_POOL);    // 足りなければ全文字から
+  // 最終保険
+  const fb="あいうえおかきくけこさしすせそたちつてとなにぬねの".split("");
+  for(const c of fb){ if(out.length>=n)break; const k=confusKey(c); if(!usedKeys.has(k)){usedKeys.add(k);out.push(c);} }
   return out;
 }
 
@@ -330,8 +355,10 @@ function renderRelay(){
   document.getElementById("relay-hint").textContent=`${relayPos+1}文字目は？`;
 
   // 文字の選択肢（正解＋ダミー3）
+  // 1文字目=実際の曲名の頭文字から / 2文字目以降=直前の文字に続く実在の並びから
   const correct=relayChars[relayPos];
-  const opts=shuffle([correct,...pickDistractorChars(correct,3)]);
+  const candidates = (relayPos===0) ? FIRST_CHARS : (TRANS[relayChars[relayPos-1]] || []);
+  const opts=shuffle([correct,...pickDistractorChars(correct,3,candidates)]);
   const box=document.getElementById("choices"); box.innerHTML="";
   opts.forEach(ch=>{ const b=document.createElement("button"); b.className="char-btn"; b.textContent=ch; b.addEventListener("click",()=>pickChar(ch)); box.appendChild(b); });
 
