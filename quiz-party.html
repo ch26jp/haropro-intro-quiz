@@ -47,9 +47,15 @@
   .name-row input{flex:1;padding:10px 12px;border-radius:10px;border:none;background:#3a2550;color:#fff;font-size:.95rem;font-family:inherit;}
   .rule-note{font-size:.72rem;color:var(--sub);line-height:1.7;margin-top:6px;}
 
-  /* ===== ゲーム画面 ===== */
-  #screen-game{position:relative;min-height:100vh;}
-  .game-center{max-width:430px;margin:0 auto;padding:96px 14px;}
+  /* ===== ゲーム画面：上ゾーン／中央情報／下ゾーンの3段構成（重ならない） ===== */
+  #screen-game{display:flex;flex-direction:column;min-height:100vh;min-height:100dvh;}
+  /* 早押しボタンを並べるゾーン（上=向かい側の人、下=手前側の人） */
+  .buzz-zone{display:flex;gap:12px;padding:12px;flex-shrink:0;}
+  .buzz-zone:empty{display:none;}
+  .buzz-top{padding-top:calc(12px + env(safe-area-inset-top));}
+  .buzz-bottom{padding-bottom:calc(12px + env(safe-area-inset-bottom));}
+  /* 中央の情報エリア。上下ゾーンに挟まれた残り領域に収め、はみ出す時だけスクロール */
+  .game-center{flex:1;min-height:0;overflow-y:auto;width:100%;max-width:460px;margin:0 auto;padding:16px 14px;display:flex;flex-direction:column;justify-content:center;}
   .scoreboard{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:14px;}
   .sb-item{background:var(--panel);border-radius:10px;padding:8px 12px;text-align:center;border:2px solid transparent;min-width:74px;}
   .sb-item .sb-name{font-size:.72rem;color:var(--sub);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:90px;}
@@ -65,19 +71,19 @@
   .center-hint{text-align:center;color:var(--sub);font-size:.85rem;margin-top:12px;animation:pulse 1.3s infinite;}
   @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
 
-  /* 四隅の早押しボタン */
+  /* 早押しボタン（上下ゾーンに人数ぶん均等に並べる） */
   .buzzer{
-    position:fixed;z-index:30;
-    width:42vw;max-width:240px;height:104px;
-    border-radius:18px;color:#fff;font-size:1.15rem;font-weight:bold;
+    flex:1;min-width:0;height:clamp(96px,13vh,124px); /* 画面の高さに応じて可変（スマホでも全体が収まる） */
+    border-radius:18px;color:#fff;font-size:1.2rem;font-weight:bold;
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
     box-shadow:0 6px 18px rgba(0,0,0,.45);
     touch-action:none;          /* スクロールを無効化して押した瞬間を取る */
-    opacity:.35;transition:opacity .15s, transform .08s;
+    opacity:.4;transition:opacity .15s, filter .1s;
     border:3px solid rgba(255,255,255,.25);
   }
   .buzzer.active{opacity:1;}     /* 曲が流れたら点灯 */
-  .buzzer:active{transform:scale(.96);}
+  /* 押した時のフィードバックはfilterで（transformだと上ゾーンの180度回転が消えるため） */
+  .buzzer:active{filter:brightness(1.2);}
   .buzzer .bz-icon{font-size:1.5rem;}
   .buzzer.dim{opacity:.12;}       /* 誰かが押した後、他のボタンを暗くする */
   .buzzer.winner{opacity:1;outline:4px solid #fff;}
@@ -159,6 +165,9 @@
 
 <!-- ===== ゲーム画面 ===== -->
 <div id="screen-game" class="hidden">
+  <!-- 上側プレイヤーの早押しボタン（向かい側の人用・180度回転） -->
+  <div class="buzz-zone buzz-top" id="zone-top"></div>
+
   <div class="game-center">
     <!-- スコアボード -->
     <div class="scoreboard" id="scoreboard"></div>
@@ -189,11 +198,14 @@
     </div>
   </div>
 
-  <!-- 四隅の早押しボタン（人数ぶんだけJSで配置） -->
-  <button class="buzzer" id="buzz-0"></button>
-  <button class="buzzer" id="buzz-1"></button>
-  <button class="buzzer" id="buzz-2"></button>
-  <button class="buzzer" id="buzz-3"></button>
+  <!-- 下側プレイヤーの早押しボタン（手前側の人用） -->
+  <div class="buzz-zone buzz-bottom" id="zone-bottom"></div>
+
+  <!-- 早押しボタン本体（JSで上下ゾーンへ振り分ける） -->
+  <button class="buzzer hidden" id="buzz-0"></button>
+  <button class="buzzer hidden" id="buzz-1"></button>
+  <button class="buzzer hidden" id="buzz-2"></button>
+  <button class="buzzer hidden" id="buzz-3"></button>
 </div>
 
 <!-- ===== 勝利画面 ===== -->
@@ -323,37 +335,31 @@ document.getElementById("start-btn").addEventListener("click",()=>{
 
 /* ===== 四隅の早押しボタンを人数ぶん配置 ===== */
 function layoutBuzzers(){
-  // 人数ごとの座席配置（fixed位置と、向き＝文字の回転）
-  // top側は180度回して、向かい合った人が読めるようにする
-  const seats = {
-    2: [ {b:"12px",l:"50%",t:"translateX(-50%)"},                 // 下・中央
-         {top:"12px",l:"50%",t:"translateX(-50%) rotate(180deg)"} ], // 上・中央
-    3: [ {b:"12px",l:"50%",t:"translateX(-50%)"},                 // 下・中央
-         {top:"12px",left:"12px",t:"rotate(180deg)"},             // 上・左
-         {top:"12px",right:"12px",t:"rotate(180deg)"} ],          // 上・右
-    4: [ {b:"12px",left:"12px"},                                  // 下・左
-         {b:"12px",right:"12px"},                                 // 下・右
-         {top:"12px",left:"12px",t:"rotate(180deg)"},             // 上・左
-         {top:"12px",right:"12px",t:"rotate(180deg)"} ],          // 上・右
+  const top = document.getElementById("zone-top");
+  const bottom = document.getElementById("zone-bottom");
+  const game = document.getElementById("screen-game");
+  // ※ゾーンはinnerHTMLでクリアしない（ボタン要素ごと消えてしまうため）。
+  //   appendChildは既存要素を「移動」するので、毎回正しいゾーンに振り直せる。
+  // 人数ごとに、各プレイヤーを上ゾーン/下ゾーンへ割り当てる。
+  // 下=手前の人（正位置）、上=向かいの人（180度回転で読める向きに）。
+  //   2人: 下1・上1 ／ 3人: 下1・上2 ／ 4人: 下2・上2
+  const seatZones = {
+    2: ["bottom","top"],
+    3: ["bottom","top","top"],
+    4: ["bottom","bottom","top","top"],
   };
-  const conf = seats[playerCount];
+  const zones = seatZones[playerCount];
   for(let i=0;i<4;i++){
     const el = document.getElementById("buzz-"+i);
-    if(i >= playerCount){ el.classList.add("hidden"); continue; }
+    if(i >= playerCount){ el.classList.add("hidden"); game.appendChild(el); continue; }
     el.classList.remove("hidden");
-    const s = conf[i];
-    // 位置のリセット
-    el.style.top=el.style.bottom=el.style.left=el.style.right=el.style.transform="";
-    if(s.top!==undefined) el.style.top=s.top;
-    if(s.b!==undefined) el.style.bottom=s.b;
-    if(s.l!==undefined) el.style.left=s.l;
-    if(s.left!==undefined) el.style.left=s.left;
-    if(s.right!==undefined) el.style.right=s.right;
-    if(s.t!==undefined) el.style.transform=s.t;
+    el.style.transform = (zones[i] === "top") ? "rotate(180deg)" : "";
     el.style.background = players[i].color;
     el.innerHTML = '<span class="bz-icon">🔔</span>' + players[i].name;
     // 押下イベント（pointerdownでタッチ/マウス両対応）
     el.onpointerdown = (ev)=>{ ev.preventDefault(); onBuzz(i); };
+    // 対応するゾーンへ並べる（flex:1で均等幅）
+    (zones[i] === "top" ? top : bottom).appendChild(el);
   }
 }
 
