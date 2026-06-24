@@ -55,9 +55,13 @@
   .sb-item .sb-name{font-size:.72rem;color:var(--sub);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:90px;}
   .sb-item .sb-pts{font-size:1.4rem;font-weight:bold;}
   .qinfo{text-align:center;color:var(--sub);font-size:.82rem;margin-bottom:10px;}
-  .player-area{position:relative;margin:0 auto 14px;max-width:360px;min-height:80px;background:#241636;border-radius:12px;overflow:hidden;}
-  .play-btn{background:var(--main);color:#fff;font-size:1.15rem;padding:16px;width:100%;max-width:360px;display:block;margin:0 auto;border-radius:14px;box-shadow:0 5px 0 var(--main-dark);}
-  .play-btn:active{box-shadow:0 2px 0 var(--main-dark);transform:translateY(3px);}
+  .player-area{position:relative;margin:0 auto 14px;max-width:402px;min-height:80px;background:#241636;border-radius:12px;overflow:hidden;}
+  /* Spotify埋め込みの曲名が答えとして見えないよう、左側を不透明カバーで隠す */
+  .cover{position:absolute;left:0;top:0;bottom:0;right:var(--play-gap,92px);background:#241636;border-radius:12px 0 0 12px;display:flex;align-items:center;justify-content:center;z-index:5;text-align:center;padding:10px;}
+  #cover-title{color:var(--sub);font-size:.9rem;animation:pulse 1.3s infinite;}
+  /* 右端の再生ボタン位置。pointer-events:none でタップは下のSpotify再生ボタンへ通す */
+  .peek{position:absolute;right:0;top:0;bottom:0;width:var(--play-gap,92px);z-index:6;display:flex;align-items:center;justify-content:flex-end;padding-right:var(--play-btn-right,10px);background:#241636;border-radius:0 12px 12px 0;pointer-events:none;}
+  .play-fake{width:28px;height:28px;border-radius:50%;background:var(--main);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.95rem;padding-left:2px;box-shadow:0 0 0 4px rgba(228,0,127,.25);transform:translateY(var(--play-btn-down,12px));}
   .center-hint{text-align:center;color:var(--sub);font-size:.85rem;margin-top:12px;animation:pulse 1.3s infinite;}
   @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
 
@@ -162,9 +166,12 @@
     <!-- 再生フェーズ -->
     <div id="phase-play">
       <div class="qinfo" id="q-info">第1問</div>
-      <div class="player-area"><div id="spotify-embed"></div></div>
-      <button class="play-btn" id="play-btn">🔊 曲を再生</button>
-      <div class="center-hint" id="play-hint">曲が流れたら、四隅のボタンで早押し！</div>
+      <div class="player-area">
+        <div id="spotify-embed"></div>
+        <div class="cover" id="cover"><span id="cover-title">▶ を押して曲を再生 →</span></div>
+        <div class="peek" id="peek"><span class="play-fake">▶</span></div>
+      </div>
+      <div class="center-hint" id="play-instr">▶ で曲が流れます。流れたら四隅のボタンで早押し！</div>
     </div>
 
     <!-- 解答フェーズ -->
@@ -362,9 +369,10 @@ function nextQuestion(){
   show("phase-play"); hide("phase-answer"); hide("phase-result");
   renderScoreboard();
   resetBuzzers();
-  // 再生ボタンを元に戻す
-  const pb = document.getElementById("play-btn"); pb.disabled=false; pb.textContent="🔊 曲を再生";
-  document.getElementById("play-hint").textContent="曲が流れたら、四隅のボタンで早押し！";
+  // カバー（曲名隠し）と透かし再生ボタンの見た目を元に戻す
+  document.getElementById("cover").style.display="flex";
+  document.getElementById("cover-title").style.display="block";
+  document.querySelector("#peek .play-fake").style.display="flex";
   // 曲をセット
   if(spotifyController){ try{ spotifyController.loadUri(curSong.uri); }catch(e){} }
 }
@@ -377,27 +385,25 @@ function resetBuzzers(){
   }
 }
 
-/* ===== 再生ボタン ===== */
-document.getElementById("play-btn").addEventListener("click",()=>{
-  initAudio();
-  const pb=document.getElementById("play-btn");
-  if(spotifyController){ try{ spotifyController.play(); }catch(e){} }
-  pb.textContent="♪ 再生中…（四隅で早押し）"; pb.disabled=true;
-});
-
 /* ===== Spotify ===== */
 window.onSpotifyIframeApiReady=(IFrameAPI)=>{
   const el=document.getElementById("spotify-embed");
   const opt={uri:(SONGS[0]?SONGS[0].uri:"spotify:track:2jrH6hp2TrMYj0fPdCFdQD"),width:"100%",height:"80"};
   IFrameAPI.createController(el,opt,(c)=>{
     spotifyController=c; window.spotifyController=c;
-    // 曲が実際に流れ始めたら早押しボタンを点灯・有効化
+    // 曲が実際に流れ始めたら、カバーの案内を消して早押しボタンを点灯・有効化
     c.addListener("playback_update",(e)=>{
       if(!e||!e.data) return;
-      if(!buzzLocked && e.data.isPaused===false){ activateBuzzers(); }
+      if(!buzzLocked && !buzzersActive && e.data.isPaused===false){ onPlaybackStarted(); }
     });
   });
 };
+// 曲が流れ始めたとき：再生の案内だけ消す（曲名カバー自体は残して答えを隠したまま）
+function onPlaybackStarted(){
+  document.getElementById("cover-title").style.display="none";
+  document.querySelector("#peek .play-fake").style.display="none";
+  activateBuzzers();
+}
 function activateBuzzers(){
   if(buzzersActive) return;
   buzzersActive = true;
