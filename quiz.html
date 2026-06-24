@@ -75,6 +75,9 @@
   .final-label{text-align:center;color:var(--sub);margin-bottom:6px;}
   .final-detail{text-align:center;margin:14px 0 20px;}
   .rank{text-align:center;font-size:1.3rem;margin-bottom:18px;}
+  /* 自己ベスト表示（終了画面） */
+  .best-line{text-align:center;color:var(--sub);font-size:.95rem;margin:-6px 0 14px;}
+  .best-line.new{color:#ffd700;font-weight:bold;font-size:1.15rem;animation:pulse 1s infinite;}
   .qfoot{margin-top:22px;color:var(--sub);font-size:.66rem;line-height:1.7;text-align:center;opacity:.85;}
   .qfoot a{color:#9ad;}
 </style>
@@ -143,6 +146,7 @@
     <div class="final-label">最終スコア</div>
     <div class="final-score" id="final-score">0</div>
     <div class="rank" id="final-rank"></div>
+    <div class="best-line" id="best-line"></div>
     <div class="final-detail" id="final-detail"></div>
     <button class="btn-primary" id="retry-btn" style="margin-bottom:10px;">もう一度遊ぶ</button>
     <a class="backlink" href="index.html" style="display:block;text-align:center;">← 別のグループを選ぶ</a>
@@ -195,6 +199,26 @@ if (KEY === "mix" || KEY === "all") {
 
 /* ===== 設定値 ===== */
 const MAX_POINTS=1000, MIN_POINTS=200, DECAY_PER_SEC=80, ANSWER_TIME=5, GRACE_MS=1500;
+
+/* ===== 成績の保存（localStorage：この端末の中だけに保存） ===== */
+// グループごとに「自己ベスト / プレイ回数 / 累計正解数 / 累計問題数」を貯める。
+// トップページ(index.html)のダッシュボードも同じキーを読む。
+const STATS_KEY = "haropro_quiz_stats_v1";
+function loadStats(){ try{ return JSON.parse(localStorage.getItem(STATS_KEY)) || {}; }catch(e){ return {}; } }
+function saveStats(group, score, correct, total){
+  const all = loadStats();
+  // そのグループの既存記録（無ければ初期値）
+  const r = all[group] || { best:0, plays:0, correct:0, questions:0, lastPlayed:null };
+  const isNewBest = score > r.best;      // 今回が自己ベストを超えたか
+  if(isNewBest) r.best = score;
+  r.plays += 1;
+  r.correct += correct;
+  r.questions += total;
+  r.lastPlayed = Date.now();
+  all[group] = r;
+  try{ localStorage.setItem(STATS_KEY, JSON.stringify(all)); }catch(e){}
+  return { isNewBest, best:r.best, plays:r.plays };
+}
 
 /* ===== 状態 ===== */
 let questions=[], current=0, totalScore=0, questionCount=10;
@@ -337,6 +361,11 @@ function endGame(){
   const rate=correctCount/total; let rank;
   if(rate>=0.9)rank="🏆 ハロプロ博士！"; else if(rate>=0.7)rank="🌟 かなりのファン！"; else if(rate>=0.4)rank="🎵 まずまず！"; else rank="🔰 これから覚えよう！";
   document.getElementById("final-rank").textContent=rank;
+  // 成績を保存し、自己ベスト更新ならその旨を表示
+  const res = saveStats(KEY, totalScore, correctCount, total);
+  const bestEl = document.getElementById("best-line");
+  if(res.isNewBest){ bestEl.textContent = "🎉 自己ベスト更新！"; bestEl.classList.add("new"); }
+  else { bestEl.textContent = `自己ベスト ${res.best} ／ このグループ ${res.plays}回プレイ`; bestEl.classList.remove("new"); }
 }
 
 document.getElementById("retry-btn").addEventListener("click",()=>{ hide("screen-end"); show("screen-start"); });

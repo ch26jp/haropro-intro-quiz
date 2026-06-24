@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<title>ハロプロ 早押し対戦（オフライン）</title>
+<style>
+  :root{
+    --main:#e4007f; --main-dark:#b00063;
+    --bg:#1a1024; --panel:#2a1838; --text:#fff; --sub:#c9b6d6;
+    --good:#22c55e; --bad:#ef4444;
+    /* プレイヤーの色（最大4人ぶん） */
+    --p1:#e4007f; --p2:#2196f3; --p3:#22c55e; --p4:#ff9800;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:radial-gradient(circle at top,#3a1f50,var(--bg));
+    color:var(--text);min-height:100vh;
+    -webkit-text-size-adjust:100%;
+    overflow-x:hidden;
+  }
+  .wrap{width:100%;max-width:560px;margin:0 auto;padding:max(14px,env(safe-area-inset-top)) 16px calc(40px + env(safe-area-inset-bottom));}
+  .hidden{display:none !important;}
+  h1{text-align:center;font-size:1.3rem;margin:6px 0 2px;}
+  h1 .accent{color:var(--main);}
+  .subtitle{text-align:center;color:var(--sub);font-size:.82rem;margin-bottom:18px;}
+  .backbar{display:flex;align-items:center;margin:2px 0 6px;}
+  .backlink{color:var(--sub);text-decoration:none;font-size:.85rem;background:rgba(255,255,255,.06);padding:7px 12px;border-radius:999px;}
+  .card{background:var(--panel);border-radius:16px;padding:20px 18px;box-shadow:0 8px 30px rgba(0,0,0,.4);}
+  button{font-family:inherit;cursor:pointer;border:none;border-radius:12px;font-weight:bold;transition:transform .08s,filter .15s;}
+  button:active{transform:scale(.97);}
+  .btn-primary{background:var(--main);color:#fff;font-size:1.1rem;padding:16px;width:100%;}
+  /* 設定画面の項目 */
+  .field{margin-bottom:18px;}
+  .field-label{font-size:.85rem;color:var(--sub);margin-bottom:8px;}
+  .opt-row{display:flex;gap:10px;}
+  .opt-btn{flex:1;background:#3a2550;color:var(--text);padding:14px 0;font-size:1.05rem;border:2px solid transparent;border-radius:12px;}
+  .opt-btn.selected{border-color:var(--main);background:#4a2d66;}
+  .opt-btn small{display:block;font-size:.66rem;color:var(--sub);font-weight:normal;margin-top:3px;}
+  select{width:100%;padding:13px;border-radius:12px;background:#3a2550;color:#fff;font-size:1rem;border:2px solid transparent;font-family:inherit;}
+  .name-inputs{display:flex;flex-direction:column;gap:8px;}
+  .name-row{display:flex;align-items:center;gap:10px;}
+  .name-dot{width:18px;height:18px;border-radius:50%;flex-shrink:0;}
+  .name-row input{flex:1;padding:10px 12px;border-radius:10px;border:none;background:#3a2550;color:#fff;font-size:.95rem;font-family:inherit;}
+  .rule-note{font-size:.72rem;color:var(--sub);line-height:1.7;margin-top:6px;}
+
+  /* ===== ゲーム画面 ===== */
+  #screen-game{position:relative;min-height:100vh;}
+  .game-center{max-width:430px;margin:0 auto;padding:96px 14px;}
+  .scoreboard{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:14px;}
+  .sb-item{background:var(--panel);border-radius:10px;padding:8px 12px;text-align:center;border:2px solid transparent;min-width:74px;}
+  .sb-item .sb-name{font-size:.72rem;color:var(--sub);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:90px;}
+  .sb-item .sb-pts{font-size:1.4rem;font-weight:bold;}
+  .qinfo{text-align:center;color:var(--sub);font-size:.82rem;margin-bottom:10px;}
+  .player-area{position:relative;margin:0 auto 14px;max-width:360px;min-height:80px;background:#241636;border-radius:12px;overflow:hidden;}
+  .play-btn{background:var(--main);color:#fff;font-size:1.15rem;padding:16px;width:100%;max-width:360px;display:block;margin:0 auto;border-radius:14px;box-shadow:0 5px 0 var(--main-dark);}
+  .play-btn:active{box-shadow:0 2px 0 var(--main-dark);transform:translateY(3px);}
+  .center-hint{text-align:center;color:var(--sub);font-size:.85rem;margin-top:12px;animation:pulse 1.3s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+
+  /* 四隅の早押しボタン */
+  .buzzer{
+    position:fixed;z-index:30;
+    width:42vw;max-width:240px;height:104px;
+    border-radius:18px;color:#fff;font-size:1.15rem;font-weight:bold;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+    box-shadow:0 6px 18px rgba(0,0,0,.45);
+    touch-action:none;          /* スクロールを無効化して押した瞬間を取る */
+    opacity:.35;transition:opacity .15s, transform .08s;
+    border:3px solid rgba(255,255,255,.25);
+  }
+  .buzzer.active{opacity:1;}     /* 曲が流れたら点灯 */
+  .buzzer:active{transform:scale(.96);}
+  .buzzer .bz-icon{font-size:1.5rem;}
+  .buzzer.dim{opacity:.12;}       /* 誰かが押した後、他のボタンを暗くする */
+  .buzzer.winner{opacity:1;outline:4px solid #fff;}
+
+  /* 解答フェーズ（中央に出す） */
+  .buzzed-banner{text-align:center;font-size:1.3rem;font-weight:bold;margin-bottom:12px;}
+  .answer-timer{text-align:center;font-size:1.4rem;font-weight:bold;margin-bottom:12px;}
+  .answer-timer.warn{color:var(--bad);}
+  .choices{display:flex;flex-direction:column;gap:10px;max-width:360px;margin:0 auto;}
+  .choice{background:#3a2550;color:var(--text);padding:15px;font-size:1rem;text-align:left;border:2px solid transparent;border-radius:12px;}
+  .choice.correct{background:var(--good);border-color:#fff;}
+  .choice.wrong{background:var(--bad);border-color:#fff;}
+  .choice:disabled{cursor:default;}
+  .result-msg{text-align:center;font-size:1.4rem;font-weight:bold;margin-bottom:8px;}
+  .result-msg.ok{color:var(--good);} .result-msg.ng{color:var(--bad);}
+  .result-song{text-align:center;color:var(--sub);margin-bottom:16px;}
+  .result-song b{color:var(--text);font-size:1.05rem;}
+
+  /* 勝利画面・演出 */
+  .win-name{text-align:center;font-size:2.2rem;font-weight:bold;color:var(--main);margin:8px 0;}
+  .win-label{text-align:center;color:var(--sub);}
+  #confetti-layer{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:50;}
+  .confetti{position:absolute;top:-30px;animation:fall 1.5s ease-in forwards;}
+  @keyframes fall{to{transform:translateY(110vh) rotate(360deg);opacity:.2;}}
+  .qfoot{margin-top:22px;color:var(--sub);font-size:.66rem;line-height:1.7;text-align:center;opacity:.85;}
+</style>
+</head>
+<body>
+
+<!-- ===== 設定画面 ===== -->
+<div class="wrap" id="screen-setup">
+  <div class="backbar"><a class="backlink" href="index.html">← トップに戻る</a></div>
+  <h1>👥 <span class="accent">みんなで</span>早押し対戦</h1>
+  <div class="subtitle">1台のスマホ/iPadを囲んで遊ぶオフラインモード</div>
+
+  <div class="card">
+    <!-- 出題グループ -->
+    <div class="field">
+      <div class="field-label">出題グループ</div>
+      <select id="group-select"></select>
+    </div>
+
+    <!-- 人数 -->
+    <div class="field">
+      <div class="field-label">プレイ人数</div>
+      <div class="opt-row" id="count-row">
+        <button class="opt-btn selected" data-count="2">2人</button>
+        <button class="opt-btn" data-count="3">3人</button>
+        <button class="opt-btn" data-count="4">4人</button>
+      </div>
+    </div>
+
+    <!-- 名前 -->
+    <div class="field">
+      <div class="field-label">プレイヤー名（そのままでもOK）</div>
+      <div class="name-inputs" id="name-inputs"></div>
+    </div>
+
+    <!-- 勝利条件 -->
+    <div class="field">
+      <div class="field-label">勝利条件（先取ポイント）</div>
+      <div class="opt-row" id="target-row">
+        <button class="opt-btn" data-target="3">3点<small>さくっと</small></button>
+        <button class="opt-btn selected" data-target="5">5点<small>標準</small></button>
+        <button class="opt-btn" data-target="7">7点<small>じっくり</small></button>
+      </div>
+    </div>
+
+    <button class="btn-primary" id="start-btn">▶ 対戦スタート</button>
+    <div class="rule-note">
+      ① 出題ごとに誰かが「🔊 曲を再生」を押す → ② 曲が流れたら、四隅の自分のボタンを<b style="color:#fff;">一番早く押した人</b>に解答権 → ③ 5択から正解で +1点。先に規定ポイントに達した人の勝ち！
+    </div>
+  </div>
+
+  <div class="qfoot">
+    非公式・非営利のファンコンテンツです。再生は Spotify の公式プレーヤーを利用しています。
+  </div>
+</div>
+
+<!-- ===== ゲーム画面 ===== -->
+<div id="screen-game" class="hidden">
+  <div class="game-center">
+    <!-- スコアボード -->
+    <div class="scoreboard" id="scoreboard"></div>
+
+    <!-- 再生フェーズ -->
+    <div id="phase-play">
+      <div class="qinfo" id="q-info">第1問</div>
+      <div class="player-area"><div id="spotify-embed"></div></div>
+      <button class="play-btn" id="play-btn">🔊 曲を再生</button>
+      <div class="center-hint" id="play-hint">曲が流れたら、四隅のボタンで早押し！</div>
+    </div>
+
+    <!-- 解答フェーズ -->
+    <div id="phase-answer" class="hidden">
+      <div class="buzzed-banner" id="buzzed-banner"></div>
+      <div class="answer-timer" id="answer-timer">7</div>
+      <div class="choices" id="choices"></div>
+    </div>
+
+    <!-- 結果フェーズ -->
+    <div id="phase-result" class="hidden">
+      <div class="result-msg" id="result-msg"></div>
+      <div class="result-song">正解は <b id="result-title"></b></div>
+      <button class="btn-primary" id="next-btn" style="max-width:360px;margin:0 auto;display:block;">次の問題 ▶</button>
+    </div>
+  </div>
+
+  <!-- 四隅の早押しボタン（人数ぶんだけJSで配置） -->
+  <button class="buzzer" id="buzz-0"></button>
+  <button class="buzzer" id="buzz-1"></button>
+  <button class="buzzer" id="buzz-2"></button>
+  <button class="buzzer" id="buzz-3"></button>
+</div>
+
+<!-- ===== 勝利画面 ===== -->
+<div class="wrap hidden" id="screen-win">
+  <div class="card" style="text-align:center;">
+    <div class="win-label">🏆 優勝</div>
+    <div class="win-name" id="win-name"></div>
+    <div id="win-board" style="margin:16px 0 22px;"></div>
+    <button class="btn-primary" id="again-btn" style="margin-bottom:10px;">もう一度（同じ設定で）</button>
+    <a class="backlink" href="#" id="setup-again" style="display:block;text-align:center;">設定を変えて遊ぶ</a>
+  </div>
+</div>
+
+<div id="confetti-layer"></div>
+
+<!-- Spotify IFrame API -->
+<script src="https://open.spotify.com/embed/iframe-api/v1" async></script>
+<!-- 全グループの曲データを読み込む（途中でグループを切り替えられるように） -->
+<script>
+  window.ALL_KEYS = ["mm","ag","jj","tf","by","on","rc","cu","bz","cg","kf"];
+  window.MIX_KEYS = ["mm","ag","jj","tf","by","on","rc"]; // 現役7グループ
+  window.ALL_KEYS.forEach(function(k){ document.write('<script src="songs-' + k + '.js?t=' + Date.now() + '"><\/script>'); });
+</script>
+<script>
+/* ===== グループ名（表示用） ===== */
+const GROUP_META = {
+  mix:{ name:"🎲 現役グループシャッフル" },
+  all:{ name:"🌈 歴代グループシャッフル" },
+  mm:{ name:"モーニング娘。" }, ag:{ name:"アンジュルム" }, jj:{ name:"Juice=Juice" },
+  tf:{ name:"つばきファクトリー" }, by:{ name:"BEYOOOOONDS" }, on:{ name:"OCHA NORMA" },
+  rc:{ name:"ロージークロニクル" }, cu:{ name:"℃-ute" }, bz:{ name:"Berryz工房" },
+  cg:{ name:"カントリー・ガールズ" }, kf:{ name:"こぶしファクトリー" },
+};
+const PLAYER_COLORS = ["var(--p1)","var(--p2)","var(--p3)","var(--p4)"];
+
+/* ===== 設定値 ===== */
+const ANSWER_TIME = 7;   // 解答の制限時間（秒）
+
+/* ===== 状態 ===== */
+let playerCount = 2, target = 5, groupKey = "mix";
+let players = [];                 // [{name, score, color}]
+let SONGS = [];                   // 出題プール
+let deck = [], deckPos = 0;       // シャッフル済みの山札
+let curSong = null, questionNo = 0;
+let buzzersActive = false, buzzLocked = false, winnerIdx = -1, answered = false;
+let answerTimer = null;
+let spotifyController = null;
+
+function show(id){document.getElementById(id).classList.remove("hidden");}
+function hide(id){document.getElementById(id).classList.add("hidden");}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+/* ===== 効果音（Web Audio） ===== */
+let audioCtx=null;
+function initAudio(){ if(!audioCtx){try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}} if(audioCtx&&audioCtx.state==="suspended")audioCtx.resume(); }
+function tone(freq,start,dur,type="sine",vol=0.22){ if(!audioCtx)return; const t0=audioCtx.currentTime+start; const o=audioCtx.createOscillator(),g=audioCtx.createGain(); o.type=type;o.frequency.value=freq; g.gain.setValueAtTime(0.0001,t0); g.gain.linearRampToValueAtTime(vol,t0+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t0+dur); o.connect(g);g.connect(audioCtx.destination); o.start(t0);o.stop(t0+dur+0.05); }
+function buzzSound(){ tone(880,0,0.12,"square",0.2); tone(1320,0.08,0.14,"square",0.2); }
+function correctSound(){ const base=523.25,arp=[0,4,7,12]; for(let i=0;i<arp.length;i++) tone(base*Math.pow(2,arp[i]/12),i*0.08,0.18,"triangle",0.25); }
+function wrongSound(){ tone(160,0,0.22,"sawtooth",0.18); tone(110,0.09,0.3,"sawtooth",0.18); }
+
+/* ===== 演出（紙吹雪） ===== */
+function burstConfetti(){ const em=["🎉","✨","🎵","💖","⭐"]; const layer=document.getElementById("confetti-layer"); for(let i=0;i<30;i++){const s=document.createElement("span");s.className="confetti";s.textContent=em[Math.floor(Math.random()*em.length)];s.style.left=Math.random()*100+"%";s.style.animationDelay=Math.random()*0.3+"s";s.style.fontSize=16+Math.random()*18+"px";layer.appendChild(s);setTimeout(()=>s.remove(),1800);} }
+
+/* ===== 曲プールを作る ===== */
+function buildSongs(key){
+  let arr;
+  if(key === "mix" || key === "all"){
+    const keys = (key === "all") ? window.ALL_KEYS : window.MIX_KEYS;
+    const merged = [].concat(...keys.map(k => window["SONGS_" + k.toUpperCase()] || []));
+    const seen = new Set();
+    arr = merged.filter(s => { if(seen.has(s.title)) return false; seen.add(s.title); return true; });
+  } else {
+    arr = (window["SONGS_" + key.toUpperCase()] || []).slice();
+  }
+  return arr;
+}
+
+/* ===== 設定画面のUI ===== */
+// グループのプルダウンを作る（シャッフル系を先頭に）
+(function initGroupSelect(){
+  const sel = document.getElementById("group-select");
+  const order = ["mix","all","mm","ag","jj","tf","by","on","rc","cu","bz","cg","kf"];
+  order.forEach(k => { const o=document.createElement("option"); o.value=k; o.textContent=GROUP_META[k].name; sel.appendChild(o); });
+  sel.value = "mix";
+})();
+
+// 人数・勝利条件のボタン
+document.querySelectorAll("#count-row .opt-btn").forEach(btn=>{
+  btn.addEventListener("click",()=>{ document.querySelectorAll("#count-row .opt-btn").forEach(b=>b.classList.remove("selected")); btn.classList.add("selected"); playerCount=parseInt(btn.dataset.count,10); renderNameInputs(); });
+});
+document.querySelectorAll("#target-row .opt-btn").forEach(btn=>{
+  btn.addEventListener("click",()=>{ document.querySelectorAll("#target-row .opt-btn").forEach(b=>b.classList.remove("selected")); btn.classList.add("selected"); target=parseInt(btn.dataset.target,10); });
+});
+
+// 名前入力欄を人数ぶん作る（入力済みの値は保持）
+function renderNameInputs(){
+  const box = document.getElementById("name-inputs");
+  const prev = Array.from(box.querySelectorAll("input")).map(i=>i.value);
+  box.innerHTML = "";
+  for(let i=0;i<playerCount;i++){
+    const row=document.createElement("div"); row.className="name-row";
+    const dot=document.createElement("span"); dot.className="name-dot"; dot.style.background=PLAYER_COLORS[i];
+    const inp=document.createElement("input"); inp.type="text"; inp.maxLength=8; inp.placeholder="プレイヤー"+(i+1); inp.value = prev[i] || "";
+    row.appendChild(dot); row.appendChild(inp); box.appendChild(row);
+  }
+}
+renderNameInputs();
+
+/* ===== 対戦スタート ===== */
+document.getElementById("start-btn").addEventListener("click",()=>{
+  initAudio();
+  groupKey = document.getElementById("group-select").value;
+  SONGS = buildSongs(groupKey);
+  if(SONGS.length < 5){ alert("このグループの曲データが少なすぎます。別のグループを選んでください。"); return; }
+  // プレイヤーを作る
+  const inputs = document.querySelectorAll("#name-inputs input");
+  players = [];
+  for(let i=0;i<playerCount;i++){
+    const nm = (inputs[i].value || "").trim() || ("プレイヤー"+(i+1));
+    players.push({ name:nm, score:0, color:PLAYER_COLORS[i] });
+  }
+  deck = shuffle(SONGS); deckPos = 0; questionNo = 0;
+  layoutBuzzers();
+  hide("screen-setup"); show("screen-game");
+  nextQuestion();
+});
+
+/* ===== 四隅の早押しボタンを人数ぶん配置 ===== */
+function layoutBuzzers(){
+  // 人数ごとの座席配置（fixed位置と、向き＝文字の回転）
+  // top側は180度回して、向かい合った人が読めるようにする
+  const seats = {
+    2: [ {b:"12px",l:"50%",t:"translateX(-50%)"},                 // 下・中央
+         {top:"12px",l:"50%",t:"translateX(-50%) rotate(180deg)"} ], // 上・中央
+    3: [ {b:"12px",l:"50%",t:"translateX(-50%)"},                 // 下・中央
+         {top:"12px",left:"12px",t:"rotate(180deg)"},             // 上・左
+         {top:"12px",right:"12px",t:"rotate(180deg)"} ],          // 上・右
+    4: [ {b:"12px",left:"12px"},                                  // 下・左
+         {b:"12px",right:"12px"},                                 // 下・右
+         {top:"12px",left:"12px",t:"rotate(180deg)"},             // 上・左
+         {top:"12px",right:"12px",t:"rotate(180deg)"} ],          // 上・右
+  };
+  const conf = seats[playerCount];
+  for(let i=0;i<4;i++){
+    const el = document.getElementById("buzz-"+i);
+    if(i >= playerCount){ el.classList.add("hidden"); continue; }
+    el.classList.remove("hidden");
+    const s = conf[i];
+    // 位置のリセット
+    el.style.top=el.style.bottom=el.style.left=el.style.right=el.style.transform="";
+    if(s.top!==undefined) el.style.top=s.top;
+    if(s.b!==undefined) el.style.bottom=s.b;
+    if(s.l!==undefined) el.style.left=s.l;
+    if(s.left!==undefined) el.style.left=s.left;
+    if(s.right!==undefined) el.style.right=s.right;
+    if(s.t!==undefined) el.style.transform=s.t;
+    el.style.background = players[i].color;
+    el.innerHTML = '<span class="bz-icon">🔔</span>' + players[i].name;
+    // 押下イベント（pointerdownでタッチ/マウス両対応）
+    el.onpointerdown = (ev)=>{ ev.preventDefault(); onBuzz(i); };
+  }
+}
+
+/* ===== 出題 ===== */
+function nextQuestion(){
+  // 山札を使い切ったらシャッフルし直す（勝者が出るまで続けるため）
+  if(deckPos >= deck.length){ deck = shuffle(SONGS); deckPos = 0; }
+  curSong = deck[deckPos++]; questionNo++;
+  buzzersActive = false; buzzLocked = false; winnerIdx = -1; answered = false;
+  clearInterval(answerTimer);
+  document.getElementById("q-info").textContent = "第" + questionNo + "問";
+  // フェーズ表示の切り替え
+  show("phase-play"); hide("phase-answer"); hide("phase-result");
+  renderScoreboard();
+  resetBuzzers();
+  // 再生ボタンを元に戻す
+  const pb = document.getElementById("play-btn"); pb.disabled=false; pb.textContent="🔊 曲を再生";
+  document.getElementById("play-hint").textContent="曲が流れたら、四隅のボタンで早押し！";
+  // 曲をセット
+  if(spotifyController){ try{ spotifyController.loadUri(curSong.uri); }catch(e){} }
+}
+
+// 四隅ボタンの見た目を初期化（暗く・非点灯）
+function resetBuzzers(){
+  for(let i=0;i<playerCount;i++){
+    const el=document.getElementById("buzz-"+i);
+    el.classList.remove("active","dim","winner");
+  }
+}
+
+/* ===== 再生ボタン ===== */
+document.getElementById("play-btn").addEventListener("click",()=>{
+  initAudio();
+  const pb=document.getElementById("play-btn");
+  if(spotifyController){ try{ spotifyController.play(); }catch(e){} }
+  pb.textContent="♪ 再生中…（四隅で早押し）"; pb.disabled=true;
+});
+
+/* ===== Spotify ===== */
+window.onSpotifyIframeApiReady=(IFrameAPI)=>{
+  const el=document.getElementById("spotify-embed");
+  const opt={uri:(SONGS[0]?SONGS[0].uri:"spotify:track:2jrH6hp2TrMYj0fPdCFdQD"),width:"100%",height:"80"};
+  IFrameAPI.createController(el,opt,(c)=>{
+    spotifyController=c; window.spotifyController=c;
+    // 曲が実際に流れ始めたら早押しボタンを点灯・有効化
+    c.addListener("playback_update",(e)=>{
+      if(!e||!e.data) return;
+      if(!buzzLocked && e.data.isPaused===false){ activateBuzzers(); }
+    });
+  });
+};
+function activateBuzzers(){
+  if(buzzersActive) return;
+  buzzersActive = true;
+  for(let i=0;i<playerCount;i++) document.getElementById("buzz-"+i).classList.add("active");
+}
+
+/* ===== 早押し ===== */
+function onBuzz(idx){
+  if(!buzzersActive || buzzLocked) return; // 再生前・確定後は無効
+  buzzLocked = true; winnerIdx = idx;
+  buzzSound();
+  if(spotifyController){ try{ spotifyController.pause(); }catch(e){} }
+  // 勝者を強調、他は暗く
+  for(let i=0;i<playerCount;i++){
+    const el=document.getElementById("buzz-"+i);
+    if(i===idx) el.classList.add("winner"); else el.classList.add("dim");
+  }
+  // 解答フェーズへ
+  hide("phase-play"); show("phase-answer");
+  const banner=document.getElementById("buzzed-banner");
+  banner.innerHTML = '<span style="color:'+players[idx].color+'">'+players[idx].name+'</span> さんの解答！';
+  showChoices();
+  startAnswerTimer();
+}
+
+/* ===== 5択を作る ===== */
+function showChoices(){
+  let others = SONGS.filter(s=>s.title!==curSong.title);
+  const wrong = shuffle(others).slice(0,4).map(s=>s.title);
+  const options = shuffle([curSong.title, ...wrong]);
+  const box=document.getElementById("choices"); box.innerHTML="";
+  options.forEach(title=>{ const b=document.createElement("button"); b.className="choice"; b.textContent=title; b.addEventListener("click",()=>selectAnswer(title,b)); box.appendChild(b); });
+}
+
+function startAnswerTimer(){
+  let remain=ANSWER_TIME; const el=document.getElementById("answer-timer"); el.textContent=remain; el.classList.remove("warn");
+  clearInterval(answerTimer);
+  answerTimer=setInterval(()=>{ remain--; el.textContent=remain; if(remain<=2)el.classList.add("warn"); if(remain<=0){clearInterval(answerTimer); if(!answered)selectAnswer(null,null);} },1000);
+}
+
+/* ===== 解答 ===== */
+function selectAnswer(title,btnEl){
+  if(answered) return; answered=true; clearInterval(answerTimer);
+  const isCorrect = title===curSong.title;
+  document.querySelectorAll(".choice").forEach(b=>{ b.disabled=true; if(b.textContent===curSong.title)b.classList.add("correct"); else if(b===btnEl)b.classList.add("wrong"); });
+  if(isCorrect){ players[winnerIdx].score++; correctSound(); }
+  else { wrongSound(); }
+  setTimeout(()=>showResult(isCorrect),900);
+}
+
+function showResult(isCorrect){
+  hide("phase-answer"); show("phase-result");
+  const msg=document.getElementById("result-msg");
+  if(isCorrect){ msg.textContent="⭕ "+players[winnerIdx].name+" 正解！ +1点"; msg.className="result-msg ok"; burstConfetti(); }
+  else { msg.textContent="❌ 残念… 不正解"; msg.className="result-msg ng"; }
+  document.getElementById("result-title").textContent=curSong.title;
+  renderScoreboard();
+  // 勝者チェック
+  if(isCorrect && players[winnerIdx].score >= target){
+    document.getElementById("next-btn").textContent = "🏆 結果を見る";
+  } else {
+    document.getElementById("next-btn").textContent = "次の問題 ▶";
+  }
+}
+
+document.getElementById("next-btn").addEventListener("click",()=>{
+  if(spotifyController){ try{ spotifyController.pause(); }catch(e){} }
+  // 勝者が出ていれば勝利画面へ
+  const champ = players.find(p=>p.score>=target);
+  if(champ){ endGame(champ); } else { nextQuestion(); }
+});
+
+/* ===== スコアボード ===== */
+function renderScoreboard(){
+  const box=document.getElementById("scoreboard"); box.innerHTML="";
+  players.forEach((p,i)=>{
+    const d=document.createElement("div"); d.className="sb-item";
+    d.style.borderColor = (i===winnerIdx) ? p.color : "transparent";
+    d.innerHTML = '<div class="sb-name" style="color:'+p.color+'">'+p.name+'</div><div class="sb-pts">'+p.score+'<span style="font-size:.7rem;color:var(--sub)"> /'+target+'</span></div>';
+    box.appendChild(d);
+  });
+}
+
+/* ===== 勝利画面 ===== */
+function endGame(champ){
+  hide("screen-game"); show("screen-win");
+  document.getElementById("win-name").textContent = champ.name;
+  document.getElementById("win-name").style.color = champ.color;
+  // 全員の最終得点（高い順）
+  const sorted = players.slice().sort((a,b)=>b.score-a.score);
+  const board=document.getElementById("win-board");
+  board.innerHTML = sorted.map((p,i)=>
+    '<div style="display:flex;justify-content:space-between;padding:6px 4px;border-bottom:1px solid rgba(255,255,255,.08);">'
+    + '<span style="color:'+p.color+';font-weight:bold;">'+(i+1)+'位　'+p.name+'</span>'
+    + '<span style="font-weight:bold;">'+p.score+'点</span></div>'
+  ).join("");
+  burstConfetti();
+}
+
+// もう一度（同じ設定）
+document.getElementById("again-btn").addEventListener("click",()=>{
+  players.forEach(p=>p.score=0);
+  deck = shuffle(SONGS); deckPos=0; questionNo=0; winnerIdx=-1;
+  hide("screen-win"); show("screen-game");
+  nextQuestion();
+});
+// 設定を変えて遊ぶ → 設定画面に戻る
+document.getElementById("setup-again").addEventListener("click",(e)=>{
+  e.preventDefault();
+  hide("screen-win"); show("screen-setup");
+});
+</script>
+</body>
+</html>

@@ -42,6 +42,17 @@
   .card .nm{font-size:1.15rem;font-weight:bold;}
   .card .ds{font-size:.78rem;color:var(--sub);margin-top:3px;}
   .card .go{color:var(--sub);font-size:1.3rem;}
+  /* これまでの成績ダッシュボード */
+  .dash{margin-top:28px;}
+  .dash h2{font-size:1rem;text-align:center;margin:0 0 4px;}
+  .dash .dash-lead{text-align:center;color:var(--sub);font-size:.72rem;margin:0 0 14px;}
+  .dash-list{display:flex;flex-direction:column;gap:8px;}
+  .dash-row{display:flex;align-items:center;gap:12px;background:var(--panel);border-radius:12px;padding:12px 14px;}
+  .dash-row .dnm{flex:1;min-width:0;font-weight:bold;font-size:.92rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .dash-row .dbest{color:#ffd700;font-weight:bold;font-size:1.05rem;}
+  .dash-row .dsub{color:var(--sub);font-size:.68rem;margin-top:2px;}
+  .dash-empty{text-align:center;color:var(--sub);font-size:.8rem;background:var(--panel);border-radius:12px;padding:18px;}
+  .dash-reset{display:block;margin:12px auto 0;background:transparent;border:1px solid rgba(255,255,255,.18);color:var(--sub);font-size:.72rem;padding:8px 16px;border-radius:999px;cursor:pointer;}
   .footer{text-align:center;color:var(--sub);font-size:.72rem;margin-top:28px;line-height:1.7;}
   .credits{margin-top:22px;padding-top:16px;border-top:1px solid rgba(255,255,255,.1);color:var(--sub);font-size:.68rem;line-height:1.85;text-align:left;}
   .credits h2{font-size:.78rem;color:#fff;margin:0 0 6px;text-align:center;}
@@ -55,9 +66,14 @@
   <h1>🎧 ハロプロ<br>早押し曲当てクイズ</h1>
   <div class="lead">グループを選んでスタート！流れた曲を当てよう</div>
 
+  <a href="quiz-party.html" style="display:block;text-decoration:none;background:linear-gradient(135deg,#ff8c00,#e4007f);color:#fff;border-radius:14px;padding:13px 16px;margin-bottom:12px;text-align:center;font-weight:bold;font-size:.9rem;box-shadow:0 4px 16px rgba(255,140,0,.3);">👥 みんなで早押し対戦（オフライン・2〜4人）→</a>
+
   <a href="v2/index.html" style="display:block;text-decoration:none;background:linear-gradient(135deg,#e4007f,#7e3eb1);color:#fff;border-radius:14px;padding:13px 16px;margin-bottom:18px;text-align:center;font-weight:bold;font-size:.9rem;box-shadow:0 4px 16px rgba(228,0,127,.3);">🔤 新方式「頭文字あてクイズ（β）」を試す →</a>
 
   <div class="cards" id="cards"></div>
+
+  <!-- これまでの成績（この端末に保存されたデータを表示） -->
+  <div class="dash" id="dash"></div>
 
   <div class="footer">
     曲はプレーヤーの▶を押すと流れます。スマホ・PCどちらでも遊べます。
@@ -102,6 +118,58 @@
       '<div class="go">▶</div>';
     box.appendChild(a);
   });
+
+  /* ===== これまでの成績ダッシュボード ===== */
+  // quiz.html が localStorage に貯めた成績(STATS_KEY)を読み、グループ別に表示する。
+  const STATS_KEY = "haropro_quiz_stats_v1";
+  // キー→表示名（GROUPS から作る。絵文字付きの名前はそのまま使う）
+  const NAME_BY_KEY = {};
+  GROUPS.forEach(g => { NAME_BY_KEY[g.key] = g.name; });
+
+  function renderDash(){
+    const dash = document.getElementById("dash");
+    let stats = {};
+    try { stats = JSON.parse(localStorage.getItem(STATS_KEY)) || {}; } catch(e) { stats = {}; }
+    // プレイ回数が1以上のグループだけ、自己ベストの高い順に並べる
+    const rows = Object.keys(stats)
+      .filter(k => stats[k] && stats[k].plays > 0)
+      .sort((a, b) => (stats[b].best || 0) - (stats[a].best || 0));
+
+    let html = '<h2>📊 これまでの成績</h2>'
+             + '<div class="dash-lead">この端末でのプレイ記録（自己ベスト順）</div>';
+
+    if (rows.length === 0) {
+      html += '<div class="dash-empty">まだ記録がありません。<br>上のグループを選んで遊ぶとここに成績が貯まります。</div>';
+      dash.innerHTML = html;
+      return;
+    }
+
+    html += '<div class="dash-list">';
+    rows.forEach(k => {
+      const r = stats[k];
+      const name = NAME_BY_KEY[k] || k;
+      // 累計の正答率（％）
+      const rate = r.questions > 0 ? Math.round(r.correct / r.questions * 100) : 0;
+      html += '<div class="dash-row">'
+            +   '<div class="dnm">' + name
+            +     '<div class="dsub">正答率 ' + rate + '％ ／ ' + r.plays + '回プレイ</div>'
+            +   '</div>'
+            +   '<div class="dbest">' + (r.best || 0) + '</div>'
+            + '</div>';
+    });
+    html += '</div>';
+    html += '<button class="dash-reset" id="dash-reset">記録をリセット</button>';
+    dash.innerHTML = html;
+
+    // リセットボタン（確認ダイアログ付き）
+    document.getElementById("dash-reset").addEventListener("click", () => {
+      if (confirm("この端末の成績をすべて消去します。よろしいですか？")) {
+        localStorage.removeItem(STATS_KEY);
+        renderDash();
+      }
+    });
+  }
+  renderDash();
 </script>
 </body>
 </html>
