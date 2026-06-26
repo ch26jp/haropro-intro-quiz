@@ -22,7 +22,10 @@
   h1{text-align:center;font-size:1.4rem;margin:6px 0 4px;}
   h1 .accent{color:var(--main);}
   .subtitle{text-align:center;color:var(--sub);font-size:.8rem;margin-bottom:18px;}
-  select{width:100%;padding:13px;border-radius:12px;background:#3a2550;color:#fff;font-size:1rem;border:2px solid transparent;font-family:inherit;margin-bottom:16px;}
+  select{width:100%;padding:13px;border-radius:12px;background:#3a2550;color:#fff;font-size:1rem;border:2px solid transparent;font-family:inherit;margin-bottom:10px;}
+  .count-row{display:flex;gap:8px;margin-bottom:16px;}
+  .count-btn{flex:1;background:#3a2550;color:var(--text);padding:10px 0;font-size:.95rem;border:2px solid transparent;border-radius:10px;font-family:inherit;font-weight:bold;cursor:pointer;}
+  .count-btn.selected{border-color:var(--main);background:#4a2d66;}
   .card{background:var(--panel);border-radius:16px;padding:14px;box-shadow:0 8px 30px rgba(0,0,0,.4);}
   .row{display:flex;align-items:center;gap:12px;padding:11px 8px;border-bottom:1px solid rgba(255,255,255,.07);}
   .row:last-child{border-bottom:none;}
@@ -38,9 +41,14 @@
 <div class="wrap">
   <div class="backbar"><a class="backlink" href="index.html">← トップに戻る</a></div>
   <h1>🏆 <span class="accent">オンライン</span>ランキング</h1>
-  <div class="subtitle">みんなのハイスコア（グループ別・上位20位）</div>
+  <div class="subtitle">みんなのハイスコア（グループ・曲数別・上位20位）</div>
 
   <select id="group-select"></select>
+  <div class="count-row" id="count-row">
+    <button class="count-btn" data-c="5">5曲</button>
+    <button class="count-btn selected" data-c="10">10曲</button>
+    <button class="count-btn" data-c="15">15曲</button>
+  </div>
 
   <div class="card" id="board">
     <div class="state">読み込み中…</div>
@@ -77,6 +85,16 @@
   const urlGroup = (new URLSearchParams(location.search).get("group") || "").toLowerCase();
   sel.value = GROUPS.some(g=>g.key===urlGroup) ? urlGroup : "mix";
 
+  // 曲数（5/10/15）。URLの ?count= があれば初期選択
+  let countVal = 10;
+  const urlCount = parseInt(new URLSearchParams(location.search).get("count") || "", 10);
+  if([5,10,15].includes(urlCount)) countVal = urlCount;
+  const countRow = document.getElementById("count-row");
+  countRow.querySelectorAll(".count-btn").forEach(b=>{
+    if(parseInt(b.dataset.c,10)===countVal){ b.classList.add("selected"); } else { b.classList.remove("selected"); }
+    b.addEventListener("click",()=>{ countRow.querySelectorAll(".count-btn").forEach(x=>x.classList.remove("selected")); b.classList.add("selected"); countVal=parseInt(b.dataset.c,10); render(); });
+  });
+
   const board = document.getElementById("board");
   function setState(msg){ board.innerHTML = '<div class="state">' + msg + '</div>'; }
 
@@ -85,7 +103,7 @@
     if(!window.HaroLB){ setState("オンライン機能に接続中…"); return; }
     setState("読み込み中…");
     try{
-      const rows = await window.HaroLB.top(sel.value, 20);
+      const rows = await window.HaroLB.top(sel.value + "_" + countVal, 20);
       if(rows.length === 0){ setState("まだ記録がありません。<br>一番乗りでスコアを登録しよう！"); return; }
       board.innerHTML = rows.map((r, i) => {
         const cls = i===0?"top1":i===1?"top2":i===2?"top3":"";

@@ -70,6 +70,7 @@
   .result-msg.ok{color:var(--good);} .result-msg.ng{color:var(--bad);}
   .result-song{text-align:center;color:var(--sub);margin-bottom:14px;}
   .result-song b{color:var(--text);font-size:1.1rem;}
+  .result-artist{display:block;color:var(--main);font-size:.9rem;font-weight:bold;margin-top:4px;}
   .gain{text-align:center;color:var(--main);font-weight:bold;margin-bottom:16px;}
   .final-score{text-align:center;font-size:3rem;color:var(--main);font-weight:bold;}
   .final-label{text-align:center;color:var(--sub);margin-bottom:6px;}
@@ -140,7 +141,7 @@
     </div>
     <div id="phase-result" class="hidden">
       <div class="result-msg" id="result-msg"></div>
-      <div class="result-song">正解は <b id="result-title"></b></div>
+      <div class="result-song">正解は <b id="result-title"></b><span id="result-artist" class="result-artist"></span></div>
       <div class="gain" id="result-gain"></div>
       <button class="btn-primary" id="next-btn">次へ ▶</button>
     </div>
@@ -254,7 +255,8 @@ if (KEY === "weak") {
   SONGS = loadWeakSongs(); // 苦手リスト（localStorage）から出題
 } else if (KEY === "mix" || KEY === "all") {
   const keys = (KEY === "all") ? window.ALL_KEYS : window.MIX_KEYS;
-  const merged = [].concat(...keys.map((k) => window["SONGS_" + k.toUpperCase()] || []));
+  // 各曲にグループ情報(_grp)を付けてから結合（正解表示でグループ名を出すため）
+  const merged = [].concat(...keys.map((k) => (window["SONGS_" + k.toUpperCase()] || []).map((s) => Object.assign({ _grp: k }, s))));
   const seen = new Set();
   SONGS = merged.filter((s) => { if (seen.has(s.title)) return false; seen.add(s.title); return true; });
   if(!window.CHAL) SONGS = shuffle(SONGS); // 通常時のみシャッフル（対戦時は全員同じ順序を保つ）
@@ -432,6 +434,10 @@ function showResult(isCorrect,gain,mult){
   hide("phase-answer"); hide("gauge-wrap"); show("phase-result");
   const msg=document.getElementById("result-msg"); msg.textContent=isCorrect?"⭕ 正解！":"❌ 不正解…"; msg.className="result-msg "+(isCorrect?"ok":"ng");
   document.getElementById("result-title").textContent=questions[current].title;
+  // 複数グループ出題（現役/歴代シャッフル・デイリー）ではグループ名も表示
+  const artEl=document.getElementById("result-artist"); const grp=questions[current]._grp;
+  if((KEY==="mix"||KEY==="all") && grp){ const gm=GROUP_META[grp]; artEl.textContent=gm?gm.name:""; }
+  else { artEl.textContent=""; }
   document.getElementById("result-gain").textContent=isCorrect?(`+${gain} ポイント`+(mult>1?`（x${(+mult.toFixed(2))} コンボ！）`:"")):"+0 ポイント";
   document.getElementById("q-score").textContent=totalScore;
   if(isCorrect){ burstConfetti(); if(streak>=2)comboFlash(streak,mult); }
@@ -491,9 +497,11 @@ function showLeaderboardBlock(){
     titleEl.textContent = (CHAL.type === "d") ? "🗓️ 今日のランキングに登録" : "⚔️ 対戦ランキングに登録";
     linkEl.style.display = "none"; // 標準ランキングへのリンクは出さない
   } else {
-    lbTargetKey = KEY;
-    titleEl.textContent = "🏆 オンラインランキングに登録";
-    linkEl.href = "leaderboard.html?group=" + KEY;
+    // 曲数ごとに別ランキング（5/10/15曲で点数の上限が違うため）
+    lbTargetKey = KEY + "_" + questionCount;
+    titleEl.textContent = "🏆 オンラインランキング（" + questionCount + "曲）に登録";
+    linkEl.style.display = "";
+    linkEl.href = "leaderboard.html?group=" + KEY + "&count=" + questionCount;
   }
   // Firebaseの準備ができたらブロックを表示（できなければ非表示のまま＝端末内の成績だけ機能）
   function reveal(){
