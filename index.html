@@ -70,6 +70,9 @@
 
   <a href="quiz-party.html" style="display:block;text-decoration:none;background:linear-gradient(135deg,#ff8c00,#e4007f);color:#fff;border-radius:14px;padding:13px 16px;margin-bottom:12px;text-align:center;font-weight:bold;font-size:.9rem;box-shadow:0 4px 16px rgba(255,140,0,.3);">👥 みんなで早押し対戦（オフライン・2〜4人）→</a>
 
+  <!-- 苦手克服モード（間違えた曲が貯まっている時だけ表示） -->
+  <a id="weak-link" href="quiz.html?group=weak" style="display:none;text-decoration:none;background:linear-gradient(135deg,#ff6b35,#e4007f);color:#fff;border-radius:14px;padding:13px 16px;margin-bottom:12px;text-align:center;font-weight:bold;font-size:.9rem;box-shadow:0 4px 16px rgba(255,107,53,.3);"></a>
+
   <a href="v2/index.html" style="display:block;text-decoration:none;background:linear-gradient(135deg,#e4007f,#7e3eb1);color:#fff;border-radius:14px;padding:13px 16px;margin-bottom:18px;text-align:center;font-weight:bold;font-size:.9rem;box-shadow:0 4px 16px rgba(228,0,127,.3);">🔤 新方式「頭文字あてクイズ（β）」を試す →</a>
 
   <div class="cards" id="cards"></div>
@@ -98,7 +101,7 @@
     { key:"all", name:"🌈 歴代グループシャッフル", color:"linear-gradient(135deg,#e60026,#EA851A,#F0CC16,#2bb673,#0079c1,#7e3eb1,#d81b60)", desc:"OG含む歴代11グループから出題！" },
     { key:"mix", name:"🎲 現役グループシャッフル", color:"linear-gradient(135deg,#e60026,#EA851A,#2bb673,#0079c1,#7e3eb1)", desc:"現役7グループから出題！" },
     { key:"mm", name:"モーニング娘。",        color:"#e60026", desc:"代表曲〜最新まで網羅" },
-    { key:"ag", name:"アンジュルム",          color:"#0079c1", desc:"改名後（ANGERME）の楽曲" },
+    { key:"ag", name:"アンジュルム",          color:"#0079c1", desc:"スマイレージ時代〜ANGERMEまで網羅" },
     { key:"jj", name:"Juice=Juice",        color:"#7e3eb1", desc:"デビュー曲〜最新まで" },
     { key:"tf", name:"つばきファクトリー",     color:"#f15a9c", desc:"デビュー曲〜最新まで" },
     { key:"by", name:"BEYOOOOONDS",        color:"#2bb673", desc:"デビュー曲〜最新まで" },
@@ -172,6 +175,18 @@
     });
   }
   renderDash();
+
+  /* ===== 苦手克服モードの入口（苦手曲があれば曲数付きで表示） ===== */
+  (function(){
+    let weak = {};
+    try { weak = JSON.parse(localStorage.getItem("haropro_weak_songs_v1")) || {}; } catch(e) { weak = {}; }
+    const n = Object.keys(weak).length;
+    const link = document.getElementById("weak-link");
+    if (n > 0) {
+      link.textContent = "🔥 苦手克服モード（" + n + "曲）→";
+      link.style.display = "block";
+    }
+  })();
 </script>
 </body>
 </html>

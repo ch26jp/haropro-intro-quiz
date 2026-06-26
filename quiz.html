@@ -185,11 +185,14 @@
 <!-- グループの曲データを動的に読み込み（キャッシュ回避のtoms付き） -->
 <script>
   window.GKEY = (new URLSearchParams(location.search).get("group") || "jj").toLowerCase();
-  if(!/^(jj|mm|ag|tf|by|on|rc|cu|bz|cg|kf|mix|all)$/.test(window.GKEY)) window.GKEY = "jj";
+  if(!/^(jj|mm|ag|tf|by|on|rc|cu|bz|cg|kf|mix|all|weak)$/.test(window.GKEY)) window.GKEY = "jj";
   window.MIX_KEYS = ["mm","ag","jj","tf","by","on","rc"]; // 現役7グループ
   window.ALL_KEYS = window.MIX_KEYS.concat(["cu","bz","cg","kf"]); // 全11（OG含む）
-  var _load = (window.GKEY === "mix") ? window.MIX_KEYS : (window.GKEY === "all") ? window.ALL_KEYS : [window.GKEY];
-  _load.forEach(function(k){ document.write('<script src="songs-' + k + '.js?t=' + Date.now() + '"><\/script>'); });
+  // 苦手克服モード(weak)は曲ファイルを読まず、localStorageの苦手曲を使う
+  if(window.GKEY !== "weak"){
+    var _load = (window.GKEY === "mix") ? window.MIX_KEYS : (window.GKEY === "all") ? window.ALL_KEYS : [window.GKEY];
+    _load.forEach(function(k){ document.write('<script src="songs-' + k + '.js?t=' + Date.now() + '"><\/script>'); });
+  }
 </script>
 <script>
 /* ===== グループ設定（名前・アクセント色） ===== */
@@ -207,14 +210,28 @@ const GROUP_META = {
   kf:{ name:"こぶしファクトリー", color:"#3f51b5" }, // 暫定
   mix:{ name:"現役グループシャッフル", color:"#f5a623" }, // 現役7
   all:{ name:"歴代グループシャッフル", color:"#b388ff" },  // 全11（OG含む）
+  weak:{ name:"🔥 苦手克服", color:"#ff6b35" },           // 間違えた曲だけ再出題
 };
 const KEY = window.GKEY;
 const META = GROUP_META[KEY] || GROUP_META.jj;
 document.getElementById("group-name").textContent = META.name;
 document.documentElement.style.setProperty("--main", META.color);
+
+// ===== 苦手克服モード用：間違えた曲をlocalStorageに記録 =====
+// 間違えると miss+1 で登録、正解すると miss-1（0になったら克服＝削除）。
+const WEAK_KEY = "haropro_weak_songs_v1";
+function loadWeakMap(){ try{ return JSON.parse(localStorage.getItem(WEAK_KEY)) || {}; }catch(e){ return {}; } }
+function saveWeakMap(m){ try{ localStorage.setItem(WEAK_KEY, JSON.stringify(m)); }catch(e){} }
+function loadWeakSongs(){ return Object.values(loadWeakMap()); }
+function weakKeyOf(s){ return s.id || s.title; }
+function recordMiss(song){ const m=loadWeakMap(); const k=weakKeyOf(song); const e=m[k]||{id:song.id,title:song.title,uri:song.uri,image:song.image||"",album:song.album||"",miss:0}; e.miss=(e.miss||0)+1; e.last=Date.now(); m[k]=e; saveWeakMap(m); }
+function recordHit(song){ const m=loadWeakMap(); const k=weakKeyOf(song); if(m[k]){ m[k].miss-=1; if(m[k].miss<=0) delete m[k]; saveWeakMap(m); } }
+
 // 曲データ（MIXは現役全グループを結合。タイトル重複は除去）
 let SONGS;
-if (KEY === "mix" || KEY === "all") {
+if (KEY === "weak") {
+  SONGS = loadWeakSongs(); // 苦手リスト（localStorage）から出題
+} else if (KEY === "mix" || KEY === "all") {
   const keys = (KEY === "all") ? window.ALL_KEYS : window.MIX_KEYS;
   const merged = [].concat(...keys.map((k) => window["SONGS_" + k.toUpperCase()] || []));
   const seen = new Set();
@@ -302,6 +319,23 @@ document.getElementById("start-btn").addEventListener("click",()=>{
   hide("screen-start"); show("screen-quiz"); loadQuestion();
 });
 
+/* ===== 苦手克服モードのスタート画面調整 ===== */
+if(KEY === "weak"){
+  document.querySelector(".subtitle").textContent = "間違えた曲だけを再出題。克服しよう！";
+  const startCard = document.getElementById("screen-start");
+  if(SONGS.length < 5){
+    // 苦手曲が少なすぎて遊べない時
+    startCard.innerHTML =
+      '<p style="text-align:center;line-height:1.9;margin-top:0;">まだ苦手な曲が足りません（現在 <b style="color:#fff;">'+SONGS.length+'曲</b>）。<br>'
+      + '通常モードで遊んで曲を間違えると、ここに苦手曲が貯まります（5曲以上で挑戦可能）。</p>'
+      + '<a class="btn-primary" href="index.html" style="display:block;text-align:center;text-decoration:none;">← トップに戻る</a>';
+  } else {
+    // 出題数の案内を苦手曲数に合わせる
+    const lead = startCard.querySelector("p");
+    if(lead) lead.innerHTML = '苦手な曲 <b style="color:#fff;">'+SONGS.length+'曲</b> から出題。<br>出題数を選んでスタート';
+  }
+}
+
 function loadQuestion(){
   answered=false; waitingForPlay=true; curPoints=MAX_POINTS; clearInterval(decayTimer);
   document.getElementById("q-progress").textContent=`第${current+1}問 / 全${questions.length}問`;
@@ -357,8 +391,8 @@ function selectAnswer(title,btnEl){
   const song=questions[current]; const isCorrect=title===song.title;
   document.querySelectorAll(".choice").forEach(b=>{ b.disabled=true; if(b.textContent===song.title)b.classList.add("correct"); else if(b===btnEl)b.classList.add("wrong"); });
   let gain=0,mult=1;
-  if(isCorrect){ correctCount++; streak++; mult=streakMultiplier(streak); gain=Math.round(curPoints*mult); totalScore+=gain; playCorrectSound(streak); }
-  else { streak=0; playWrongSound(); }
+  if(isCorrect){ correctCount++; streak++; mult=streakMultiplier(streak); gain=Math.round(curPoints*mult); totalScore+=gain; playCorrectSound(streak); recordHit(song); }
+  else { streak=0; playWrongSound(); recordMiss(song); }
   setTimeout(()=>showResult(isCorrect,gain,mult),900);
 }
 
@@ -388,13 +422,20 @@ function endGame(){
   const rate=correctCount/total; let rank;
   if(rate>=0.9)rank="🏆 ハロプロ博士！"; else if(rate>=0.7)rank="🌟 かなりのファン！"; else if(rate>=0.4)rank="🎵 まずまず！"; else rank="🔰 これから覚えよう！";
   document.getElementById("final-rank").textContent=rank;
-  // 成績を保存し、自己ベスト更新ならその旨を表示
-  const res = saveStats(KEY, totalScore, correctCount, total);
   const bestEl = document.getElementById("best-line");
-  if(res.isNewBest){ bestEl.textContent = "🎉 自己ベスト更新！"; bestEl.classList.add("new"); }
-  else { bestEl.textContent = `自己ベスト ${res.best} ／ このグループ ${res.plays}回プレイ`; bestEl.classList.remove("new"); }
-  // オンラインランキング登録ブロックを表示
-  showLeaderboardBlock();
+  if(KEY === "weak"){
+    // 苦手モードは練習扱い：成績保存もランキング登録もしない。残りの苦手曲数を表示
+    const remain = loadWeakSongs().length;
+    bestEl.textContent = remain > 0 ? `🔥 苦手曲 残り ${remain}曲` : "🎉 苦手曲をすべて克服！";
+    bestEl.classList.remove("new");
+  } else {
+    // 成績を保存し、自己ベスト更新ならその旨を表示
+    const res = saveStats(KEY, totalScore, correctCount, total);
+    if(res.isNewBest){ bestEl.textContent = "🎉 自己ベスト更新！"; bestEl.classList.add("new"); }
+    else { bestEl.textContent = `自己ベスト ${res.best} ／ このグループ ${res.plays}回プレイ`; bestEl.classList.remove("new"); }
+    // オンラインランキング登録ブロックを表示（苦手モードでは出さない）
+    showLeaderboardBlock();
+  }
 }
 
 /* ===== オンラインランキング登録 ===== */

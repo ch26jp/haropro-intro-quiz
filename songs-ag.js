@@ -1,5 +1,432 @@
 window.SONGS_AG = [
   {
+    "title": "オトナになるって難しい！！！",
+    "id": "7m407O2pckslg3xekErcGS",
+    "uri": "spotify:track:7m407O2pckslg3xekErcGS",
+    "album": "オトナになるって難しい！！！",
+    "image": "https://i.scdn.co/image/ab67616d0000b2730b72483d4f5c3212577c9b72"
+  },
+  {
+    "title": "夢見る 15歳",
+    "id": "0aJQu7VD8Rx2jSPC3IcAUd",
+    "uri": "spotify:track:0aJQu7VD8Rx2jSPC3IcAUd",
+    "album": "夢見る 15歳",
+    "image": "https://i.scdn.co/image/ab67616d0000b2731c6066660a6ffe23c369a79e"
+  },
+  {
+    "title": "サンキュ！ クレームブリュレの友情",
+    "id": "1r2hJM5lt0Q1dxHsPP1G3d",
+    "uri": "spotify:track:1r2hJM5lt0Q1dxHsPP1G3d",
+    "album": "夢見る 15歳",
+    "image": "https://i.scdn.co/image/ab67616d0000b2731c6066660a6ffe23c369a79e"
+  },
+  {
+    "title": "○○ がんばらなくてもええねんで！！",
+    "id": "2GHQmpXgyCKYYg4l75mAkI",
+    "uri": "spotify:track:2GHQmpXgyCKYYg4l75mAkI",
+    "album": "○○ がんばらなくてもええねんで！！",
+    "image": "https://i.scdn.co/image/ab67616d0000b273aa7c869c342e24e16c4512b2"
+  },
+  {
+    "title": "○○ がんばらなくてもいいんだよ！！",
+    "id": "0tOFbm3784RBhYrez8mLKT",
+    "uri": "spotify:track:0tOFbm3784RBhYrez8mLKT",
+    "album": "○○ がんばらなくてもええねんで！！",
+    "image": "https://i.scdn.co/image/ab67616d0000b273aa7c869c342e24e16c4512b2"
+  },
+  {
+    "title": "スマイル美人",
+    "id": "5bR2C1bzy39R4kIieyU3so",
+    "uri": "spotify:track:5bR2C1bzy39R4kIieyU3so",
+    "album": "○○ がんばらなくてもええねんで！！",
+    "image": "https://i.scdn.co/image/ab67616d0000b273aa7c869c342e24e16c4512b2"
+  },
+  {
+    "title": "同じ時給で働く友達の美人ママ",
+    "id": "6utbOzrxYslXlL68GnxGx3",
+    "uri": "spotify:track:6utbOzrxYslXlL68GnxGx3",
+    "album": "同じ時給で働く友達の美人ママ",
+    "image": "https://i.scdn.co/image/ab67616d0000b273ef2d85066e807af6d7d80527"
+  },
+  {
+    "title": "ちょこっとLOVE",
+    "id": "4vlyz0QU4ymSd00qpmm97p",
+    "uri": "spotify:track:4vlyz0QU4ymSd00qpmm97p",
+    "album": "同じ時給で働く友達の美人ママ",
+    "image": "https://i.scdn.co/image/ab67616d0000b273ef2d85066e807af6d7d80527"
+  },
+  {
+    "title": "マイ・スクール・マーチ",
+    "id": "509zgM67gXzCc3np2UBk16",
+    "uri": "spotify:track:509zgM67gXzCc3np2UBk16",
+    "album": "マイ・スクール・マーチ",
+    "image": "https://i.scdn.co/image/ab67616d0000b273bd7d2592dccc8fce5dc21a71"
+  },
+  {
+    "title": "モーニング・チャイム！！！",
+    "id": "1eQz8TaUhgTebpVY0Kx5f8",
+    "uri": "spotify:track:1eQz8TaUhgTebpVY0Kx5f8",
+    "album": "マイ・スクール・マーチ",
+    "image": "https://i.scdn.co/image/ab67616d0000b273bd7d2592dccc8fce5dc21a71"
+  },
+  {
+    "title": "ぁまのじゃく",
+    "id": "1oDZlmaNU1T3UkZzPa4aJs",
+    "uri": "spotify:track:1oDZlmaNU1T3UkZzPa4aJs",
+    "album": "悪ガキッ①",
+    "image": "https://i.scdn.co/image/ab67616d0000b27383192be23eb85be5d5bacb8f"
+  },
+  {
+    "title": "スキちゃん",
+    "id": "5SArgQds3tu1ngrav7NIaJ",
+    "uri": "spotify:track:5SArgQds3tu1ngrav7NIaJ",
+    "album": "悪ガキッ①",
+    "image": "https://i.scdn.co/image/ab67616d0000b27383192be23eb85be5d5bacb8f"
+  },
+  {
+    "title": "あすはデートなのに、今すぐ声が聞きたい",
+    "id": "6h8iNUFXWZA8j2leI63dtB",
+    "uri": "spotify:track:6h8iNUFXWZA8j2leI63dtB",
+    "album": "悪ガキッ①",
+    "image": "https://i.scdn.co/image/ab67616d0000b27383192be23eb85be5d5bacb8f"
+  },
+  {
+    "title": "踊ろうよ",
+    "id": "7pYySUY1HJ3kojzHiM1a5y",
+    "uri": "spotify:track:7pYySUY1HJ3kojzHiM1a5y",
+    "album": "悪ガキッ①",
+    "image": "https://i.scdn.co/image/ab67616d0000b27383192be23eb85be5d5bacb8f"
+  },
+  {
+    "title": "女ばかりの日曜日",
+    "id": "0WH9VYVDefDtCGkyNjuIDb",
+    "uri": "spotify:track:0WH9VYVDefDtCGkyNjuIDb",
+    "album": "悪ガキッ①",
+    "image": "https://i.scdn.co/image/ab67616d0000b27383192be23eb85be5d5bacb8f"
+  },
+  {
+    "title": "シューティング スター",
+    "id": "4KZA7WSjjUpz4fXUoqV90T",
+    "uri": "spotify:track:4KZA7WSjjUpz4fXUoqV90T",
+    "album": "悪ガキッ①",
+    "image": "https://i.scdn.co/image/ab67616d0000b27383192be23eb85be5d5bacb8f"
+  },
+  {
+    "title": "学級委員長",
+    "id": "0dJXV0diLLbMZN58ONHl2u",
+    "uri": "spotify:track:0dJXV0diLLbMZN58ONHl2u",
+    "album": "悪ガキッ①",
+    "image": "https://i.scdn.co/image/ab67616d0000b27383192be23eb85be5d5bacb8f"
+  },
+  {
+    "title": "しっかりしてよ！もう",
+    "id": "3s7VGvqv8JpcM9INpXCe7r",
+    "uri": "spotify:track:3s7VGvqv8JpcM9INpXCe7r",
+    "album": "悪ガキッ①",
+    "image": "https://i.scdn.co/image/ab67616d0000b27383192be23eb85be5d5bacb8f"
+  },
+  {
+    "title": "ショートカット",
+    "id": "76V6B76upR4FWV7sQZLaBH",
+    "uri": "spotify:track:76V6B76upR4FWV7sQZLaBH",
+    "album": "ショートカット (通常盤)",
+    "image": "https://i.scdn.co/image/ab67616d0000b2732331a73cbfde73bbd33eb6bb"
+  },
+  {
+    "title": "乙女 パスタに感動",
+    "id": "2Vab9qGhLUJcDuQsghP7Sz",
+    "uri": "spotify:track:2Vab9qGhLUJcDuQsghP7Sz",
+    "album": "ショートカット (通常盤)",
+    "image": "https://i.scdn.co/image/ab67616d0000b2732331a73cbfde73bbd33eb6bb"
+  },
+  {
+    "title": "パン屋さんのアルバイト",
+    "id": "63dAFKMOnqh9LGHnixgsYo",
+    "uri": "spotify:track:63dAFKMOnqh9LGHnixgsYo",
+    "album": "ショートカット (初回生産限定盤)",
+    "image": "https://i.scdn.co/image/ab67616d0000b2730f19f455ea692a92489ecac5"
+  },
+  {
+    "title": "恋にBooing ブー！",
+    "id": "1nzTpU54vL1yjzmDIaDXic",
+    "uri": "spotify:track:1nzTpU54vL1yjzmDIaDXic",
+    "album": "恋にBooing ブー！ (通常盤)",
+    "image": "https://i.scdn.co/image/ab67616d0000b273cbca5f74ba63307ed55dc750"
+  },
+  {
+    "title": "恋をしちゃいました！",
+    "id": "1UdQpmK1JtjPISXfXl9vYS",
+    "uri": "spotify:track:1UdQpmK1JtjPISXfXl9vYS",
+    "album": "恋にBooing ブー！ (通常盤)",
+    "image": "https://i.scdn.co/image/ab67616d0000b273cbca5f74ba63307ed55dc750"
+  },
+  {
+    "title": "初恋の貴方へ",
+    "id": "6g0PKjWWHwtJ7qLjESWgpR",
+    "uri": "spotify:track:6g0PKjWWHwtJ7qLjESWgpR",
+    "album": "恋にBooing ブー！ (初回生産限定盤A)",
+    "image": "https://i.scdn.co/image/ab67616d0000b27310e9b2b585aceec87d308bd1"
+  },
+  {
+    "title": "有頂天LOVE",
+    "id": "0KPJkAkoeLQ6I0Uq7IAKJ9",
+    "uri": "spotify:track:0KPJkAkoeLQ6I0Uq7IAKJ9",
+    "album": "有頂天LOVE (通常盤)",
+    "image": "https://i.scdn.co/image/ab67616d0000b27358c8021dc79c19fc6498664b"
+  },
+  {
+    "title": "自転車チリリン",
+    "id": "7yX4OnXxoDdwj5lGAlspIS",
+    "uri": "spotify:track:7yX4OnXxoDdwj5lGAlspIS",
+    "album": "有頂天LOVE (初回生産限定盤D)",
+    "image": "https://i.scdn.co/image/ab67616d0000b273a5508185dbd363a988e4f79b"
+  },
+  {
+    "title": "チュッ！夏パ～ティ",
+    "id": "0rk0KlukwmFbnEvQVaXI0H",
+    "uri": "spotify:track:0rk0KlukwmFbnEvQVaXI0H",
+    "album": "有頂天LOVE (通常盤)",
+    "image": "https://i.scdn.co/image/ab67616d0000b27358c8021dc79c19fc6498664b"
+  },
+  {
+    "title": "タチアガール",
+    "id": "1uyAVsKlRKr0NzOEhqECzv",
+    "uri": "spotify:track:1uyAVsKlRKr0NzOEhqECzv",
+    "album": "タチアガール (通常盤)",
+    "image": "https://i.scdn.co/image/ab67616d0000b273e86987705e6ad1924946f5f4"
+  },
+  {
+    "title": "スマイレージ　シングルス",
+    "id": "74j9OFwRjRDu6ay1dr1aKC",
+    "uri": "spotify:track:74j9OFwRjRDu6ay1dr1aKC",
+    "album": "タチアガール (初回生産限定盤D)",
+    "image": "https://i.scdn.co/image/ab67616d0000b2739df2e65665b8b45f644903a1"
+  },
+  {
+    "title": "スマイル音丼",
+    "id": "1UocPmt4tYRCv2sMDAQkDg",
+    "uri": "spotify:track:1UocPmt4tYRCv2sMDAQkDg",
+    "album": "タチアガール (通常盤)",
+    "image": "https://i.scdn.co/image/ab67616d0000b273e86987705e6ad1924946f5f4"
+  },
+  {
+    "title": "ブギートレイン'11",
+    "id": "1hoHzgZv9Kypjo2Cdsl4vX",
+    "uri": "spotify:track:1hoHzgZv9Kypjo2Cdsl4vX",
+    "album": "タチアガール (初回生産限定盤C)",
+    "image": "https://i.scdn.co/image/ab67616d0000b2738e599edf8e1979f613926707"
+  },
+  {
+    "title": "プリーズ ミニスカ ポストウーマン！",
+    "id": "2m3OZaSqGgmgc3XtJzwYEM",
+    "uri": "spotify:track:2m3OZaSqGgmgc3XtJzwYEM",
+    "album": "プリーズ ミニスカ ポストウーマン！ (通常盤)",
+    "image": "https://i.scdn.co/image/ab67616d0000b273008aac18750ad6d413149c5e"
+  },
+  {
+    "title": "手を握って歩きたい",
+    "id": "3jdzmreOaiDgz3UgMZkDIN",
+    "uri": "spotify:track:3jdzmreOaiDgz3UgMZkDIN",
+    "album": "プリーズ ミニスカ ポストウーマン！ (通常盤)",
+    "image": "https://i.scdn.co/image/ab67616d0000b273008aac18750ad6d413149c5e"
+  },
+  {
+    "title": "こんにちは こんばんは",
+    "id": "5O3UZTBvd9k3Sv5wou03HX",
+    "uri": "spotify:track:5O3UZTBvd9k3Sv5wou03HX",
+    "album": "プリーズ ミニスカ ポストウーマン！ (初回生産限定盤A)",
+    "image": "https://i.scdn.co/image/ab67616d0000b2737001fb61522604e5ceb3214d"
+  },
+  {
+    "title": "チョトマテクダサイ！",
+    "id": "1eAET8qO1qsq5t724Bdo5r",
+    "uri": "spotify:track:1eAET8qO1qsq5t724Bdo5r",
+    "album": "チョトマテクダサイ！ (通常盤)",
+    "image": "https://i.scdn.co/image/ab67616d0000b273a7ca265a02c1fd8737b38a66"
+  },
+  {
+    "title": "涙GIRL",
+    "id": "0zP1W1HpeqoLpT3aPvQvhv",
+    "uri": "spotify:track:0zP1W1HpeqoLpT3aPvQvhv",
+    "album": "チョトマテクダサイ！ (通常盤)",
+    "image": "https://i.scdn.co/image/ab67616d0000b273a7ca265a02c1fd8737b38a66"
+  },
+  {
+    "title": "チャンス到来！",
+    "id": "3bSFWjyb6y1Bn0EJBgeBRc",
+    "uri": "spotify:track:3bSFWjyb6y1Bn0EJBgeBRc",
+    "album": "チョトマテクダサイ！ (初回生産限定盤C)",
+    "image": "https://i.scdn.co/image/ab67616d0000b273d564278c33eed04c686a679b"
+  },
+  {
+    "title": "ドットビキニ",
+    "id": "6o0hW5jITkFtZ3AluE6F2z",
+    "uri": "spotify:track:6o0hW5jITkFtZ3AluE6F2z",
+    "album": "ドットビキニ (通常盤)",
+    "image": "https://i.scdn.co/image/ab67616d0000b2736965da493500766bb1066766"
+  },
+  {
+    "title": "恋人は心の応援団",
+    "id": "1c4NrQ6UU9WUmYPUapCebx",
+    "uri": "spotify:track:1c4NrQ6UU9WUmYPUapCebx",
+    "album": "ドットビキニ (通常盤)",
+    "image": "https://i.scdn.co/image/ab67616d0000b2736965da493500766bb1066766"
+  },
+  {
+    "title": "黄色い自転車とサンドウィッチ",
+    "id": "4C01V5iuhZHdYfmw3kPhbf",
+    "uri": "spotify:track:4C01V5iuhZHdYfmw3kPhbf",
+    "album": "スマイレージ ベストアルバム完全版①",
+    "image": "https://i.scdn.co/image/ab67616d0000b27301fc9f2295318c6d1c1e18f4"
+  },
+  {
+    "title": "好きよ、純情反抗期。",
+    "id": "3jGIbrQ3XE7uaHGVwfjzCa",
+    "uri": "spotify:track:3jGIbrQ3XE7uaHGVwfjzCa",
+    "album": "好きよ、純情反抗期。",
+    "image": "https://i.scdn.co/image/ab67616d0000b273c20c13956dc25917a2d00cea"
+  },
+  {
+    "title": "君は自転車 私は電車で帰宅",
+    "id": "3vqqUM8JRL8tQbUAliGVFy",
+    "uri": "spotify:track:3vqqUM8JRL8tQbUAliGVFy",
+    "album": "好きよ、純情反抗期。",
+    "image": "https://i.scdn.co/image/ab67616d0000b273c20c13956dc25917a2d00cea"
+  },
+  {
+    "title": "寒いね。",
+    "id": "6rVi1CLDgKyUwhMs1mp6mW",
+    "uri": "spotify:track:6rVi1CLDgKyUwhMs1mp6mW",
+    "album": "寒いね。",
+    "image": "https://i.scdn.co/image/ab67616d0000b273ac418c3357124117a8eea121"
+  },
+  {
+    "title": "私、ちょいとカワイイ裏番長",
+    "id": "0Y8gFhm4zJ66OlM81luUBx",
+    "uri": "spotify:track:0Y8gFhm4zJ66OlM81luUBx",
+    "album": "寒いね。",
+    "image": "https://i.scdn.co/image/ab67616d0000b273ac418c3357124117a8eea121"
+  },
+  {
+    "title": "旅立ちの春が来た",
+    "id": "0jzkQx63WytXjIrCmQbit0",
+    "uri": "spotify:track:0jzkQx63WytXjIrCmQbit0",
+    "album": "旅立ちの春が来た",
+    "image": "https://i.scdn.co/image/ab67616d0000b273d1e62d2a4ff9ad8a0008cc18"
+  },
+  {
+    "title": "どうしよう",
+    "id": "38HEUnlyZdKWwxvkfDo9ZY",
+    "uri": "spotify:track:38HEUnlyZdKWwxvkfDo9ZY",
+    "album": "旅立ちの春が来た",
+    "image": "https://i.scdn.co/image/ab67616d0000b273d1e62d2a4ff9ad8a0008cc18"
+  },
+  {
+    "title": "新・日本のすすめ！",
+    "id": "7q6z988MuGVfacXTwV6Oj7",
+    "uri": "spotify:track:7q6z988MuGVfacXTwV6Oj7",
+    "album": "②スマイルセンセーション",
+    "image": "https://i.scdn.co/image/ab67616d0000b273310272b27f50895fd032c5f0"
+  },
+  {
+    "title": "私の心",
+    "id": "6QKeyCQRZQKBARHPE0eh0Q",
+    "uri": "spotify:track:6QKeyCQRZQKBARHPE0eh0Q",
+    "album": "②スマイルセンセーション",
+    "image": "https://i.scdn.co/image/ab67616d0000b273310272b27f50895fd032c5f0"
+  },
+  {
+    "title": "夕暮れ 恋の時間",
+    "id": "37TbLYATAiqOvc4K89SDP4",
+    "uri": "spotify:track:37TbLYATAiqOvc4K89SDP4",
+    "album": "②スマイルセンセーション",
+    "image": "https://i.scdn.co/image/ab67616d0000b273310272b27f50895fd032c5f0"
+  },
+  {
+    "title": "大人の途中",
+    "id": "3KZpqNOX3PcZTx9ANceLZS",
+    "uri": "spotify:track:3KZpqNOX3PcZTx9ANceLZS",
+    "album": "②スマイルセンセーション",
+    "image": "https://i.scdn.co/image/ab67616d0000b273310272b27f50895fd032c5f0"
+  },
+  {
+    "title": "天真爛漫",
+    "id": "45h0ayDmQ6r61zVoABNY7D",
+    "uri": "spotify:track:45h0ayDmQ6r61zVoABNY7D",
+    "album": "②スマイルセンセーション",
+    "image": "https://i.scdn.co/image/ab67616d0000b273310272b27f50895fd032c5f0"
+  },
+  {
+    "title": "ねぇ 先輩",
+    "id": "5Yx2xEohS6W2cDHJyEzBCD",
+    "uri": "spotify:track:5Yx2xEohS6W2cDHJyEzBCD",
+    "album": "②スマイルセンセーション",
+    "image": "https://i.scdn.co/image/ab67616d0000b273310272b27f50895fd032c5f0"
+  },
+  {
+    "title": "さよなら さよなら さよなら",
+    "id": "4c6kneLBbRm3Dcyzo6lBey",
+    "uri": "spotify:track:4c6kneLBbRm3Dcyzo6lBey",
+    "album": "②スマイルセンセーション",
+    "image": "https://i.scdn.co/image/ab67616d0000b273310272b27f50895fd032c5f0"
+  },
+  {
+    "title": "ヤッタルチャン",
+    "id": "5UxEN6mDttoZZFDW7l4nwF",
+    "uri": "spotify:track:5UxEN6mDttoZZFDW7l4nwF",
+    "album": "新しい私になれ！/ヤッタルチャン",
+    "image": "https://i.scdn.co/image/ab67616d0000b273e1f3b9ed8738848db3db54be"
+  },
+  {
+    "title": "新しい私になれ！",
+    "id": "2i8rbYNghDTocivhxvEdgH",
+    "uri": "spotify:track:2i8rbYNghDTocivhxvEdgH",
+    "album": "新しい私になれ！/ヤッタルチャン",
+    "image": "https://i.scdn.co/image/ab67616d0000b273e1f3b9ed8738848db3db54be"
+  },
+  {
+    "title": "ええか！？",
+    "id": "1eYWDhcFqOaYb3GkmNlNnp",
+    "uri": "spotify:track:1eYWDhcFqOaYb3GkmNlNnp",
+    "album": "ええか！？／「良い奴」",
+    "image": "https://i.scdn.co/image/ab67616d0000b273b4a108302c616268a8814a3d"
+  },
+  {
+    "title": "「良い奴」",
+    "id": "3kI2PfnKfhSoolddgSxtJL",
+    "uri": "spotify:track:3kI2PfnKfhSoolddgSxtJL",
+    "album": "ええか！？／「良い奴」",
+    "image": "https://i.scdn.co/image/ab67616d0000b273b4a108302c616268a8814a3d"
+  },
+  {
+    "title": "ミステリーナイト！",
+    "id": "0WjvsKM0XBNOOtliAR6EWg",
+    "uri": "spotify:track:0WjvsKM0XBNOOtliAR6EWg",
+    "album": "ミステリーナイト！/エイティーン エモーション",
+    "image": "https://i.scdn.co/image/ab67616d0000b27340fba81170cfda539c0b89ad"
+  },
+  {
+    "title": "エイティーン エモーション",
+    "id": "39wun1P7z8s86oaVBzw0KQ",
+    "uri": "spotify:track:39wun1P7z8s86oaVBzw0KQ",
+    "album": "ミステリーナイト！/エイティーン エモーション",
+    "image": "https://i.scdn.co/image/ab67616d0000b27340fba81170cfda539c0b89ad"
+  },
+  {
+    "title": "地球は今日も愛を育む",
+    "id": "30pGy9FDCOqdaGyMMftfeg",
+    "uri": "spotify:track:30pGy9FDCOqdaGyMMftfeg",
+    "album": "嗚呼 すすきの/地球は今日も愛を育む",
+    "image": "https://i.scdn.co/image/ab67616d0000b273dc9c06ac578d7fce36de860a"
+  },
+  {
+    "title": "嗚呼 すすきの",
+    "id": "1KEoZPRDHUOzHbCGQCUZsS",
+    "uri": "spotify:track:1KEoZPRDHUOzHbCGQCUZsS",
+    "album": "嗚呼 すすきの/地球は今日も愛を育む",
+    "image": "https://i.scdn.co/image/ab67616d0000b273dc9c06ac578d7fce36de860a"
+  },
+  {
     "title": "乙女の逆襲",
     "id": "0f1053zo6clULYtxOTxgSF",
     "uri": "spotify:track:0f1053zo6clULYtxOTxgSF",
@@ -54,6 +481,41 @@ window.SONGS_AG = [
     "uri": "spotify:track:5zQ6TrkuEDijWxjn7lxJO5",
     "album": "S/mileage / ANGERME SELECTION ALBUM「大器晩成」 (初回生産限定盤A)",
     "image": "https://i.scdn.co/image/ab67616d0000b2732b6cf1615b7dd4f6ecb21733"
+  },
+  {
+    "title": "カクゴして！",
+    "id": "7uzUsiQ1IfDpORfghUbLkY",
+    "uri": "spotify:track:7uzUsiQ1IfDpORfghUbLkY",
+    "album": "S/mileage / ANGERME SELECTION ALBUM「大器晩成」 (初回生産限定盤A)",
+    "image": "https://i.scdn.co/image/ab67616d0000b2732b6cf1615b7dd4f6ecb21733"
+  },
+  {
+    "title": "マリオネット37℃",
+    "id": "6WKgX9bQiBOax8ftJuCFHI",
+    "uri": "spotify:track:6WKgX9bQiBOax8ftJuCFHI",
+    "album": "S/mileage / ANGERME SELECTION ALBUM「大器晩成」 (初回生産限定盤B)",
+    "image": "https://i.scdn.co/image/ab67616d0000b27337127f2dfba9f5cd5bce937d"
+  },
+  {
+    "title": "汗かいてカルナバル",
+    "id": "69DIyIQ2KB6yYEXyqGrf6p",
+    "uri": "spotify:track:69DIyIQ2KB6yYEXyqGrf6p",
+    "album": "S/mileage / ANGERME SELECTION ALBUM「大器晩成」 (初回生産限定盤B)",
+    "image": "https://i.scdn.co/image/ab67616d0000b27337127f2dfba9f5cd5bce937d"
+  },
+  {
+    "title": "交差点",
+    "id": "0x9XePLwlIX33h7OmX0ZUD",
+    "uri": "spotify:track:0x9XePLwlIX33h7OmX0ZUD",
+    "album": "S/mileage / ANGERME SELECTION ALBUM「大器晩成」 (通常盤)",
+    "image": "https://i.scdn.co/image/ab67616d0000b273c0f11b522cab3eda9d9c5441"
+  },
+  {
+    "title": "友よ",
+    "id": "2Q3XwBJGPs3vBnob8vGhPv",
+    "uri": "spotify:track:2Q3XwBJGPs3vBnob8vGhPv",
+    "album": "S/mileage / ANGERME SELECTION ALBUM「大器晩成」 (通常盤)",
+    "image": "https://i.scdn.co/image/ab67616d0000b273c0f11b522cab3eda9d9c5441"
   },
   {
     "title": "次々続々",
@@ -189,9 +651,51 @@ window.SONGS_AG = [
     "image": "https://i.scdn.co/image/ab67616d0000b273b88d9a05e16d1e4942f6c6be"
   },
   {
+    "title": "もう一歩",
+    "id": "0hSGpkr02uyJZ81AP4N7Oe",
+    "uri": "spotify:track:0hSGpkr02uyJZ81AP4N7Oe",
+    "album": "輪廻転生～ANGERME Past, Present & Future～",
+    "image": "https://i.scdn.co/image/ab67616d0000b2734a2aebfc86e7b943f02ed37c"
+  },
+  {
     "title": "赤いイヤホン",
     "id": "2UACqnyVcjauLHNzP5WkLZ",
     "uri": "spotify:track:2UACqnyVcjauLHNzP5WkLZ",
+    "album": "輪廻転生～ANGERME Past, Present & Future～",
+    "image": "https://i.scdn.co/image/ab67616d0000b2734a2aebfc86e7b943f02ed37c"
+  },
+  {
+    "title": "I 無双 Strong！",
+    "id": "0SJVwkaEJSf5GtHVr4WRQ3",
+    "uri": "spotify:track:0SJVwkaEJSf5GtHVr4WRQ3",
+    "album": "輪廻転生～ANGERME Past, Present & Future～",
+    "image": "https://i.scdn.co/image/ab67616d0000b2734a2aebfc86e7b943f02ed37c"
+  },
+  {
+    "title": "帰りたくないな。",
+    "id": "4TZzdqQPIvRnnqcWX9uPPW",
+    "uri": "spotify:track:4TZzdqQPIvRnnqcWX9uPPW",
+    "album": "輪廻転生～ANGERME Past, Present & Future～",
+    "image": "https://i.scdn.co/image/ab67616d0000b2734a2aebfc86e7b943f02ed37c"
+  },
+  {
+    "title": "いとし いとしと Say My Heart",
+    "id": "1w8ssnIs7e6jCPel7vKnIE",
+    "uri": "spotify:track:1w8ssnIs7e6jCPel7vKnIE",
+    "album": "輪廻転生～ANGERME Past, Present & Future～",
+    "image": "https://i.scdn.co/image/ab67616d0000b2734a2aebfc86e7b943f02ed37c"
+  },
+  {
+    "title": "人生、すなわちパンタ･レイ",
+    "id": "3xWAmCPy3MbMxPEf7uAEKY",
+    "uri": "spotify:track:3xWAmCPy3MbMxPEf7uAEKY",
+    "album": "輪廻転生～ANGERME Past, Present & Future～",
+    "image": "https://i.scdn.co/image/ab67616d0000b2734a2aebfc86e7b943f02ed37c"
+  },
+  {
+    "title": "わたし",
+    "id": "3NrNcWVZLKihsz5rmr2yHk",
+    "uri": "spotify:track:3NrNcWVZLKihsz5rmr2yHk",
     "album": "輪廻転生～ANGERME Past, Present & Future～",
     "image": "https://i.scdn.co/image/ab67616d0000b2734a2aebfc86e7b943f02ed37c"
   },
@@ -301,9 +805,37 @@ window.SONGS_AG = [
     "image": "https://i.scdn.co/image/ab67616d0000b2730c2ae1895ca7e7098e4122b1"
   },
   {
+    "title": "ぶっ壊したい",
+    "id": "42ILIP9lRrn7rNX836Zbv7",
+    "uri": "spotify:track:42ILIP9lRrn7rNX836Zbv7",
+    "album": "BIG LOVE",
+    "image": "https://i.scdn.co/image/ab67616d0000b273e4ac7532bf576984a53ca681"
+  },
+  {
     "title": "Survive～生きてく為に夢を見んだ",
     "id": "7s18OX2cNOSMNFzjp7l5r5",
     "uri": "spotify:track:7s18OX2cNOSMNFzjp7l5r5",
+    "album": "BIG LOVE",
+    "image": "https://i.scdn.co/image/ab67616d0000b273e4ac7532bf576984a53ca681"
+  },
+  {
+    "title": "23時のペルソナ",
+    "id": "0a6Y5fmlNLtfzOyiyBM72U",
+    "uri": "spotify:track:0a6Y5fmlNLtfzOyiyBM72U",
+    "album": "BIG LOVE",
+    "image": "https://i.scdn.co/image/ab67616d0000b273e4ac7532bf576984a53ca681"
+  },
+  {
+    "title": "Sister Sister",
+    "id": "2RmL9AN5sq8yXiJ7X9njI8",
+    "uri": "spotify:track:2RmL9AN5sq8yXiJ7X9njI8",
+    "album": "BIG LOVE",
+    "image": "https://i.scdn.co/image/ab67616d0000b273e4ac7532bf576984a53ca681"
+  },
+  {
+    "title": "Forever Friend",
+    "id": "61aCHa4npSY9pKMxJ439Az",
+    "uri": "spotify:track:61aCHa4npSY9pKMxJ439Az",
     "album": "BIG LOVE",
     "image": "https://i.scdn.co/image/ab67616d0000b273e4ac7532bf576984a53ca681"
   },
@@ -399,6 +931,20 @@ window.SONGS_AG = [
     "image": "https://i.scdn.co/image/ab67616d0000b2739e197c7dc0b3c15138b31371"
   },
   {
+    "title": "FAST PASS",
+    "id": "3erlQXNMUoJ5bB2lUHmD32",
+    "uri": "spotify:track:3erlQXNMUoJ5bB2lUHmD32",
+    "album": "Keep Your Smile！",
+    "image": "https://i.scdn.co/image/ab67616d0000b27302913be0b5377ad11d4f8f94"
+  },
+  {
+    "title": "Celebrate！ Celebrate！",
+    "id": "6rxsD38QzHSr4UFc4gUnn4",
+    "uri": "spotify:track:6rxsD38QzHSr4UFc4gUnn4",
+    "album": "Keep Your Smile！",
+    "image": "https://i.scdn.co/image/ab67616d0000b27302913be0b5377ad11d4f8f94"
+  },
+  {
     "title": "トラブルメーカー",
     "id": "5ynsKHvmXawyKMLS3ylTr8",
     "uri": "spotify:track:5ynsKHvmXawyKMLS3ylTr8",
@@ -406,11 +952,25 @@ window.SONGS_AG = [
     "image": "https://i.scdn.co/image/ab67616d0000b27302913be0b5377ad11d4f8f94"
   },
   {
-    "title": "寒いね。",
-    "id": "7kYMMI4su8kTdSCWnIe0Jb",
-    "uri": "spotify:track:7kYMMI4su8kTdSCWnIe0Jb",
-    "album": "アンジュルム 2025 autumn 「Keep Your Smile！」 final",
-    "image": "https://i.scdn.co/image/ab67616d0000b273654c3bf0ad528de008a0fca4"
+    "title": "プリズンブレイカー",
+    "id": "7BllMi9ubk1LOwFfNYmYd4",
+    "uri": "spotify:track:7BllMi9ubk1LOwFfNYmYd4",
+    "album": "Keep Your Smile！",
+    "image": "https://i.scdn.co/image/ab67616d0000b27302913be0b5377ad11d4f8f94"
+  },
+  {
+    "title": "右ななめ後ろから",
+    "id": "05k9tShndEEaImah7XjSdz",
+    "uri": "spotify:track:05k9tShndEEaImah7XjSdz",
+    "album": "Keep Your Smile！",
+    "image": "https://i.scdn.co/image/ab67616d0000b27302913be0b5377ad11d4f8f94"
+  },
+  {
+    "title": "午後3時スクランブル",
+    "id": "3RRfD6QfORYLODIPXb9tM5",
+    "uri": "spotify:track:3RRfD6QfORYLODIPXb9tM5",
+    "album": "Keep Your Smile！",
+    "image": "https://i.scdn.co/image/ab67616d0000b27302913be0b5377ad11d4f8f94"
   },
   {
     "title": "BaBaBa Burning Love！",
