@@ -78,6 +78,20 @@
   /* 自己ベスト表示（終了画面） */
   .best-line{text-align:center;color:var(--sub);font-size:.95rem;margin:-6px 0 14px;}
   .best-line.new{color:#ffd700;font-weight:bold;font-size:1.15rem;animation:pulse 1s infinite;}
+  /* オンラインランキング登録ブロック（終了画面） */
+  .lb-block{background:#241636;border-radius:14px;padding:16px 14px;margin:6px 0 14px;}
+  .lb-title{text-align:center;font-weight:bold;margin-bottom:10px;}
+  .lb-name{width:100%;padding:12px;border-radius:10px;border:none;background:#3a2550;color:#fff;font-size:1rem;font-family:inherit;margin-bottom:10px;text-align:center;}
+  .lb-status{text-align:center;font-size:.85rem;color:var(--sub);min-height:1.1em;margin-top:8px;}
+  .lb-status.ok{color:var(--good);font-weight:bold;}
+  .lb-status.ng{color:var(--bad);}
+  .lb-top{margin-top:12px;}
+  .lb-top .lb-row{display:flex;align-items:center;gap:10px;padding:7px 4px;border-bottom:1px solid rgba(255,255,255,.07);font-size:.92rem;}
+  .lb-top .lb-row:last-child{border-bottom:none;}
+  .lb-top .lb-no{width:26px;text-align:center;color:var(--sub);font-weight:bold;}
+  .lb-top .lb-nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .lb-top .lb-sc{font-weight:bold;color:var(--main);}
+  .lb-top .lb-row.me{background:rgba(228,0,127,.12);border-radius:8px;}
   .qfoot{margin-top:22px;color:var(--sub);font-size:.66rem;line-height:1.7;text-align:center;opacity:.85;}
   .qfoot a{color:#9ad;}
 </style>
@@ -148,13 +162,26 @@
     <div class="rank" id="final-rank"></div>
     <div class="best-line" id="best-line"></div>
     <div class="final-detail" id="final-detail"></div>
+
+    <!-- オンラインランキング登録（Firebase接続できた時だけ表示） -->
+    <div class="lb-block hidden" id="lb-block">
+      <div class="lb-title">🏆 オンラインランキングに登録</div>
+      <input class="lb-name" id="lb-name" type="text" maxlength="12" placeholder="ニックネーム（12文字まで）" />
+      <button class="btn-primary" id="lb-submit">この記録を登録する</button>
+      <div class="lb-status" id="lb-status"></div>
+      <div class="lb-top" id="lb-top"></div>
+    </div>
+
     <button class="btn-primary" id="retry-btn" style="margin-bottom:10px;">もう一度遊ぶ</button>
+    <a class="backlink" href="leaderboard.html" id="lb-link" style="display:block;text-align:center;margin-bottom:8px;">🏆 ランキングを見る</a>
     <a class="backlink" href="index.html" style="display:block;text-align:center;">← 別のグループを選ぶ</a>
   </div>
 </div>
 
 <!-- Spotify IFrame API -->
 <script src="https://open.spotify.com/embed/iframe-api/v1" async></script>
+<!-- オンラインランキング連携（Firebase）。読み込み後に window.HaroLB が使える -->
+<script type="module" src="leaderboard.js"></script>
 <!-- グループの曲データを動的に読み込み（キャッシュ回避のtoms付き） -->
 <script>
   window.GKEY = (new URLSearchParams(location.search).get("group") || "jj").toLowerCase();
@@ -366,6 +393,65 @@ function endGame(){
   const bestEl = document.getElementById("best-line");
   if(res.isNewBest){ bestEl.textContent = "🎉 自己ベスト更新！"; bestEl.classList.add("new"); }
   else { bestEl.textContent = `自己ベスト ${res.best} ／ このグループ ${res.plays}回プレイ`; bestEl.classList.remove("new"); }
+  // オンラインランキング登録ブロックを表示
+  showLeaderboardBlock();
+}
+
+/* ===== オンラインランキング登録 ===== */
+const LB_NAME_KEY = "haropro_lb_name"; // 前回のニックネームを覚えておく
+let lbSubmitted = false;               // 同じゲームでの二重登録を防ぐ
+
+function showLeaderboardBlock(){
+  const block = document.getElementById("lb-block");
+  // 「ランキングを見る」リンクはこのグループ向けに
+  document.getElementById("lb-link").href = "leaderboard.html?group=" + KEY;
+  // Firebaseの準備ができたらブロックを表示（できなければ非表示のまま＝端末内の成績だけ機能）
+  function reveal(){
+    block.classList.remove("hidden");
+    document.getElementById("lb-name").value = localStorage.getItem(LB_NAME_KEY) || "";
+    lbSubmitted = false;
+    document.getElementById("lb-submit").disabled = false;
+    const st = document.getElementById("lb-status"); st.textContent = ""; st.className = "lb-status";
+    document.getElementById("lb-top").innerHTML = "";
+  }
+  if(window.HaroLB){ reveal(); }
+  else { window.addEventListener("harolb-ready", reveal, { once:true }); }
+}
+
+document.getElementById("lb-submit").addEventListener("click", async ()=>{
+  if(lbSubmitted) return;
+  const status = document.getElementById("lb-status");
+  const name = (document.getElementById("lb-name").value || "").trim();
+  if(name.length < 1){ status.textContent = "ニックネームを入力してください"; status.className = "lb-status ng"; return; }
+  if(!window.HaroLB){ status.textContent = "オンラインに接続できません"; status.className = "lb-status ng"; return; }
+  const btn = document.getElementById("lb-submit");
+  btn.disabled = true; status.textContent = "登録中…"; status.className = "lb-status";
+  try{
+    await window.HaroLB.submit(KEY, name, totalScore);
+    lbSubmitted = true;
+    localStorage.setItem(LB_NAME_KEY, name.slice(0,12));
+    status.textContent = "✅ 登録しました！"; status.className = "lb-status ok";
+    await showTop(name);
+  }catch(e){
+    btn.disabled = false;
+    status.textContent = "登録に失敗しました。通信環境を確認して再度お試しください。"; status.className = "lb-status ng";
+  }
+});
+
+// 上位を取得して表示（自分の名前はハイライト）
+async function showTop(myName){
+  const box = document.getElementById("lb-top");
+  try{
+    const rows = await window.HaroLB.top(KEY, 10);
+    box.innerHTML = rows.map((r,i)=>{
+      // 名前はテキストとして安全に入れる（HTMLとして解釈させない）
+      const nameEl = document.createElement("span"); nameEl.textContent = r.name || "（名無し）";
+      const me = (r.name === myName) ? " me" : "";
+      return '<div class="lb-row'+me+'"><div class="lb-no">'+(i+1)+'</div>'
+           + '<div class="lb-nm">'+nameEl.innerHTML+'</div>'
+           + '<div class="lb-sc">'+(r.score||0)+'</div></div>';
+    }).join("");
+  }catch(e){ /* 上位表示の失敗は無視（登録自体は成功している） */ }
 }
 
 document.getElementById("retry-btn").addEventListener("click",()=>{ hide("screen-end"); show("screen-start"); });

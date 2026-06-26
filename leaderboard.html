@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<title>ハロプロ 早押しクイズ ランキング</title>
+<style>
+  :root{ --main:#e4007f; --bg:#1a1024; --panel:#2a1838; --text:#fff; --sub:#c9b6d6; }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:radial-gradient(circle at top,#3a1f50,var(--bg));
+    color:var(--text);min-height:100vh;
+    padding:max(16px,env(safe-area-inset-top)) 16px calc(40px + env(safe-area-inset-bottom));
+    -webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:520px;margin:0 auto;}
+  .backbar{display:flex;margin:2px 0 10px;}
+  .backlink{color:var(--sub);text-decoration:none;font-size:.85rem;background:rgba(255,255,255,.06);padding:7px 12px;border-radius:999px;}
+  h1{text-align:center;font-size:1.4rem;margin:6px 0 4px;}
+  h1 .accent{color:var(--main);}
+  .subtitle{text-align:center;color:var(--sub);font-size:.8rem;margin-bottom:18px;}
+  select{width:100%;padding:13px;border-radius:12px;background:#3a2550;color:#fff;font-size:1rem;border:2px solid transparent;font-family:inherit;margin-bottom:16px;}
+  .card{background:var(--panel);border-radius:16px;padding:14px;box-shadow:0 8px 30px rgba(0,0,0,.4);}
+  .row{display:flex;align-items:center;gap:12px;padding:11px 8px;border-bottom:1px solid rgba(255,255,255,.07);}
+  .row:last-child{border-bottom:none;}
+  .rank-no{width:34px;text-align:center;font-weight:bold;font-size:1.05rem;color:var(--sub);flex-shrink:0;}
+  .rank-no.top1{color:#ffd700;} .rank-no.top2{color:#cfd8dc;} .rank-no.top3{color:#e6a96b;}
+  .row .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:bold;}
+  .row .sc{font-weight:bold;font-size:1.15rem;color:var(--main);}
+  .state{text-align:center;color:var(--sub);font-size:.88rem;padding:26px 10px;line-height:1.7;}
+  .foot{text-align:center;color:var(--sub);font-size:.66rem;margin-top:20px;line-height:1.7;opacity:.85;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="backbar"><a class="backlink" href="index.html">← トップに戻る</a></div>
+  <h1>🏆 <span class="accent">オンライン</span>ランキング</h1>
+  <div class="subtitle">みんなのハイスコア（グループ別・上位20位）</div>
+
+  <select id="group-select"></select>
+
+  <div class="card" id="board">
+    <div class="state">読み込み中…</div>
+  </div>
+
+  <div class="foot">
+    スコアはお遊びのランキングです。みんなで楽しく競いましょう🎵
+  </div>
+</div>
+
+<!-- Firebase連携（読み込み後に window.HaroLB が使える） -->
+<script type="module" src="leaderboard.js"></script>
+<script>
+  // グループ一覧（トップページと同じ並び。mix/all も含む）
+  const GROUPS = [
+    { key:"all", name:"🌈 歴代グループシャッフル" },
+    { key:"mix", name:"🎲 現役グループシャッフル" },
+    { key:"mm", name:"モーニング娘。" },
+    { key:"ag", name:"アンジュルム" },
+    { key:"jj", name:"Juice=Juice" },
+    { key:"tf", name:"つばきファクトリー" },
+    { key:"by", name:"BEYOOOOONDS" },
+    { key:"on", name:"OCHA NORMA" },
+    { key:"rc", name:"ロージークロニクル" },
+    { key:"cu", name:"℃-ute" },
+    { key:"bz", name:"Berryz工房" },
+    { key:"cg", name:"カントリー・ガールズ" },
+    { key:"kf", name:"こぶしファクトリー" },
+  ];
+
+  // プルダウンを作る（URLの ?group= があればそれを初期選択）
+  const sel = document.getElementById("group-select");
+  GROUPS.forEach(g => { const o=document.createElement("option"); o.value=g.key; o.textContent=g.name; sel.appendChild(o); });
+  const urlGroup = (new URLSearchParams(location.search).get("group") || "").toLowerCase();
+  sel.value = GROUPS.some(g=>g.key===urlGroup) ? urlGroup : "mix";
+
+  const board = document.getElementById("board");
+  function setState(msg){ board.innerHTML = '<div class="state">' + msg + '</div>'; }
+
+  // ランキングを描画
+  async function render(){
+    if(!window.HaroLB){ setState("オンライン機能に接続中…"); return; }
+    setState("読み込み中…");
+    try{
+      const rows = await window.HaroLB.top(sel.value, 20);
+      if(rows.length === 0){ setState("まだ記録がありません。<br>一番乗りでスコアを登録しよう！"); return; }
+      board.innerHTML = rows.map((r, i) => {
+        const cls = i===0?"top1":i===1?"top2":i===2?"top3":"";
+        const medal = i===0?"🥇":i===1?"🥈":i===2?"🥉":(i+1);
+        // 名前はテキストとして安全に入れる（HTMLとして解釈させない）
+        const nameEl = document.createElement("span"); nameEl.textContent = r.name || "（名無し）";
+        return '<div class="row"><div class="rank-no '+cls+'">'+medal+'</div>'
+             + '<div class="nm">'+nameEl.innerHTML+'</div>'
+             + '<div class="sc">'+(r.score||0)+'</div></div>';
+      }).join("");
+    }catch(e){
+      setState("読み込みに失敗しました。<br>通信環境を確認してもう一度お試しください。");
+    }
+  }
+
+  // グループ変更で再読み込み
+  sel.addEventListener("change", render);
+  // Firebaseの準備ができたら描画（すでに準備済みなら即描画）
+  if(window.HaroLBReady){ render(); }
+  else { window.addEventListener("harolb-ready", render, { once:true }); }
+  // 念のため、一定時間たっても接続できない場合の保険
+  setTimeout(()=>{ if(!window.HaroLB) setState("オンライン機能に接続できませんでした。<br>時間をおいて再度お試しください。"); }, 8000);
+</script>
+</body>
+</html>
