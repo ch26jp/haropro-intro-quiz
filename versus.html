@@ -53,15 +53,8 @@
 <body>
 <div class="wrap">
   <div class="backbar"><a class="backlink" href="index.html">← トップに戻る</a></div>
-  <h1>⚔️ <span class="accent">オンライン</span>対戦</h1>
-  <div class="subtitle">みんなで同じ問題に挑戦して得点を競おう</div>
-
-  <!-- デイリーチャレンジ -->
-  <div class="card">
-    <h2>🗓️ 今日のチャレンジ</h2>
-    <p class="desc">毎日入れ替わる「今日の10問」（現役シャッフル）。1日1回挑戦して、その日のランキングで競おう。</p>
-    <div id="daily-area"><div class="state">読み込み中…</div></div>
-  </div>
+  <h1>🤝 <span class="accent">友達と</span>対戦</h1>
+  <div class="subtitle">同じ問題セットを共有して、得点を競い合おう</div>
 
   <!-- 友達と対戦 -->
   <div class="card">
@@ -94,52 +87,7 @@
   <div class="foot">お遊びの対戦です。スコアはブラウザ計算なので、みんなで楽しく競いましょう🎵</div>
 </div>
 
-<!-- Firebase連携（読み込み後に window.HaroLB が使える） -->
-<script type="module" src="leaderboard.js"></script>
 <script>
-  // ===== 共通 =====
-  // 今日の日付（ローカル）を YYYYMMDD に
-  function todayStr(){
-    const d = new Date();
-    return "" + d.getFullYear() + String(d.getMonth()+1).padStart(2,"0") + String(d.getDate()).padStart(2,"0");
-  }
-  const DAILY_GROUP = "mix", DAILY_COUNT = 10;
-
-  // ===== デイリーチャレンジ =====
-  const dailyArea = document.getElementById("daily-area");
-  const today = todayStr();
-  const dailyDone = (localStorage.getItem("haropro_daily_done") === today);
-
-  function dailyPlayUrl(){
-    return "quiz.html?cg=" + DAILY_GROUP + "&cn=" + DAILY_COUNT + "&cs=" + today + "&ct=d&cl=" + encodeURIComponent("今日のチャレンジ");
-  }
-
-  async function renderDaily(){
-    if(dailyDone){
-      // 今日は挑戦済み → 結果（今日のランキング）を表示
-      let html = '<div class="done-badge">✅ 今日はもう挑戦しました</div>';
-      html += '<div class="board" id="daily-board"><div class="state">今日のランキング読み込み中…</div></div>';
-      dailyArea.innerHTML = html;
-      await renderDailyBoard();
-    }else{
-      dailyArea.innerHTML = '<a class="btn-primary" href="'+dailyPlayUrl()+'" style="display:block;text-align:center;text-decoration:none;">▶ 今日のチャレンジに挑戦</a>';
-    }
-  }
-  async function renderDailyBoard(){
-    const board = document.getElementById("daily-board");
-    if(!board) return;
-    if(!window.HaroLB){ board.innerHTML = '<div class="state">オンライン接続中…</div>'; return; }
-    try{
-      const rows = await window.HaroLB.top("daily_" + today, 20);
-      if(!rows.length){ board.innerHTML = '<div class="state">まだ記録がありません。一番乗り！</div>'; return; }
-      board.innerHTML = rows.map((r,i)=>{
-        const medal = i===0?"🥇":i===1?"🥈":i===2?"🥉":(i+1);
-        const nm = document.createElement("span"); nm.textContent = r.name || "（名無し）";
-        return '<div class="row"><div class="no">'+medal+'</div><div class="nm">'+nm.innerHTML+'</div><div class="sc">'+(r.score||0)+'</div></div>';
-      }).join("");
-    }catch(e){ board.innerHTML = '<div class="state">読み込みに失敗しました</div>'; }
-  }
-
   // ===== 友達と対戦：リンク作成 =====
   const GROUPS = [
     { key:"mix", name:"🎲 現役グループシャッフル" },
@@ -176,10 +124,6 @@
     else { alert("この端末は共有に未対応です。リンクをコピーして送ってください。"); }
   });
   document.getElementById("play-btn").addEventListener("click",()=>{ if(madeUrl) location.href = madeUrl; });
-
-  // 初期描画（Firebase準備を待ってデイリーを表示）
-  if(window.HaroLBReady){ renderDaily(); }
-  else { window.addEventListener("harolb-ready", renderDaily, { once:true }); setTimeout(()=>{ if(!window.HaroLB) renderDaily(); }, 6000); }
 </script>
 </body>
 </html>
