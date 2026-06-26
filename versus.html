@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<title>ハロプロ 早押しクイズ オンライン対戦</title>
+<style>
+  :root{ --main:#e4007f; --bg:#1a1024; --panel:#2a1838; --text:#fff; --sub:#c9b6d6; --good:#22c55e; }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:radial-gradient(circle at top,#3a1f50,var(--bg));
+    color:var(--text);min-height:100vh;
+    padding:max(16px,env(safe-area-inset-top)) 16px calc(40px + env(safe-area-inset-bottom));
+    -webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:520px;margin:0 auto;}
+  .backbar{display:flex;margin:2px 0 10px;}
+  .backlink{color:var(--sub);text-decoration:none;font-size:.85rem;background:rgba(255,255,255,.06);padding:7px 12px;border-radius:999px;}
+  h1{text-align:center;font-size:1.4rem;margin:6px 0 4px;}
+  h1 .accent{color:var(--main);}
+  .subtitle{text-align:center;color:var(--sub);font-size:.8rem;margin-bottom:18px;}
+  .card{background:var(--panel);border-radius:16px;padding:18px 16px;box-shadow:0 8px 30px rgba(0,0,0,.4);margin-bottom:16px;}
+  .card h2{font-size:1.05rem;margin:0 0 4px;}
+  .card .desc{color:var(--sub);font-size:.78rem;margin:0 0 14px;line-height:1.6;}
+  button{font-family:inherit;cursor:pointer;border:none;border-radius:12px;font-weight:bold;transition:transform .08s,filter .15s;}
+  button:active{transform:scale(.98);}
+  .btn-primary{background:var(--main);color:#fff;font-size:1.05rem;padding:15px;width:100%;}
+  .btn-sub{background:#3a2550;color:#fff;font-size:.95rem;padding:12px;width:100%;margin-top:8px;}
+  .field{margin-bottom:14px;}
+  .field-label{font-size:.8rem;color:var(--sub);margin-bottom:6px;}
+  select{width:100%;padding:12px;border-radius:10px;background:#3a2550;color:#fff;font-size:1rem;border:2px solid transparent;font-family:inherit;}
+  .count-row{display:flex;gap:8px;}
+  .count-btn{flex:1;background:#3a2550;color:var(--text);padding:12px 0;font-size:1.05rem;border:2px solid transparent;border-radius:10px;}
+  .count-btn.selected{border-color:var(--main);background:#4a2d66;}
+  .link-box{margin-top:12px;display:none;}
+  .link-row{display:flex;gap:8px;}
+  .link-row input{flex:1;min-width:0;padding:11px;border-radius:10px;border:none;background:#1a1024;color:#9ad;font-size:.8rem;font-family:inherit;}
+  .copy-btn{background:var(--main);color:#fff;padding:0 16px;border-radius:10px;font-size:.85rem;white-space:nowrap;}
+  .share-note{color:var(--sub);font-size:.72rem;margin-top:8px;line-height:1.6;}
+  .done-badge{text-align:center;color:var(--good);font-weight:bold;padding:8px;background:rgba(34,197,94,.12);border-radius:10px;margin-bottom:10px;}
+  .board .row{display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid rgba(255,255,255,.07);font-size:.92rem;}
+  .board .row:last-child{border-bottom:none;}
+  .board .no{width:28px;text-align:center;font-weight:bold;color:var(--sub);}
+  .board .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:bold;}
+  .board .sc{font-weight:bold;color:var(--main);}
+  .state{text-align:center;color:var(--sub);font-size:.85rem;padding:14px;}
+  .foot{text-align:center;color:var(--sub);font-size:.66rem;margin-top:8px;line-height:1.7;opacity:.85;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="backbar"><a class="backlink" href="index.html">← トップに戻る</a></div>
+  <h1>⚔️ <span class="accent">オンライン</span>対戦</h1>
+  <div class="subtitle">みんなで同じ問題に挑戦して得点を競おう</div>
+
+  <!-- デイリーチャレンジ -->
+  <div class="card">
+    <h2>🗓️ 今日のチャレンジ</h2>
+    <p class="desc">毎日入れ替わる「今日の10問」（現役シャッフル）。1日1回挑戦して、その日のランキングで競おう。</p>
+    <div id="daily-area"><div class="state">読み込み中…</div></div>
+  </div>
+
+  <!-- 友達と対戦 -->
+  <div class="card">
+    <h2>🤝 友達と対戦をつくる</h2>
+    <p class="desc">グループと曲数を選んで対戦リンクを作成。友達に送ると、全員が同じ問題に挑戦して得点を比べられます。</p>
+    <div class="field">
+      <div class="field-label">出題グループ</div>
+      <select id="vg-select"></select>
+    </div>
+    <div class="field">
+      <div class="field-label">曲数</div>
+      <div class="count-row" id="vc-row">
+        <button class="count-btn" data-c="5">5曲</button>
+        <button class="count-btn selected" data-c="10">10曲</button>
+        <button class="count-btn" data-c="15">15曲</button>
+      </div>
+    </div>
+    <button class="btn-primary" id="make-btn">🔗 対戦リンクをつくる</button>
+    <div class="link-box" id="link-box">
+      <div class="link-row">
+        <input id="link-input" type="text" readonly />
+        <button class="copy-btn" id="copy-btn">コピー</button>
+      </div>
+      <button class="btn-sub" id="share-btn">📤 共有する</button>
+      <button class="btn-sub" id="play-btn">▶ 自分も今すぐ挑戦する</button>
+      <div class="share-note">このリンクを開いた人全員が同じ問題に挑戦します。結果は対戦専用ランキングで比較されます。</div>
+    </div>
+  </div>
+
+  <div class="foot">お遊びの対戦です。スコアはブラウザ計算なので、みんなで楽しく競いましょう🎵</div>
+</div>
+
+<!-- Firebase連携（読み込み後に window.HaroLB が使える） -->
+<script type="module" src="leaderboard.js"></script>
+<script>
+  // ===== 共通 =====
+  // 今日の日付（ローカル）を YYYYMMDD に
+  function todayStr(){
+    const d = new Date();
+    return "" + d.getFullYear() + String(d.getMonth()+1).padStart(2,"0") + String(d.getDate()).padStart(2,"0");
+  }
+  const DAILY_GROUP = "mix", DAILY_COUNT = 10;
+
+  // ===== デイリーチャレンジ =====
+  const dailyArea = document.getElementById("daily-area");
+  const today = todayStr();
+  const dailyDone = (localStorage.getItem("haropro_daily_done") === today);
+
+  function dailyPlayUrl(){
+    return "quiz.html?cg=" + DAILY_GROUP + "&cn=" + DAILY_COUNT + "&cs=" + today + "&ct=d&cl=" + encodeURIComponent("今日のチャレンジ");
+  }
+
+  async function renderDaily(){
+    if(dailyDone){
+      // 今日は挑戦済み → 結果（今日のランキング）を表示
+      let html = '<div class="done-badge">✅ 今日はもう挑戦しました</div>';
+      html += '<div class="board" id="daily-board"><div class="state">今日のランキング読み込み中…</div></div>';
+      dailyArea.innerHTML = html;
+      await renderDailyBoard();
+    }else{
+      dailyArea.innerHTML = '<a class="btn-primary" href="'+dailyPlayUrl()+'" style="display:block;text-align:center;text-decoration:none;">▶ 今日のチャレンジに挑戦</a>';
+    }
+  }
+  async function renderDailyBoard(){
+    const board = document.getElementById("daily-board");
+    if(!board) return;
+    if(!window.HaroLB){ board.innerHTML = '<div class="state">オンライン接続中…</div>'; return; }
+    try{
+      const rows = await window.HaroLB.top("daily_" + today, 20);
+      if(!rows.length){ board.innerHTML = '<div class="state">まだ記録がありません。一番乗り！</div>'; return; }
+      board.innerHTML = rows.map((r,i)=>{
+        const medal = i===0?"🥇":i===1?"🥈":i===2?"🥉":(i+1);
+        const nm = document.createElement("span"); nm.textContent = r.name || "（名無し）";
+        return '<div class="row"><div class="no">'+medal+'</div><div class="nm">'+nm.innerHTML+'</div><div class="sc">'+(r.score||0)+'</div></div>';
+      }).join("");
+    }catch(e){ board.innerHTML = '<div class="state">読み込みに失敗しました</div>'; }
+  }
+
+  // ===== 友達と対戦：リンク作成 =====
+  const GROUPS = [
+    { key:"mix", name:"🎲 現役グループシャッフル" },
+    { key:"all", name:"🌈 歴代グループシャッフル" },
+    { key:"mm", name:"モーニング娘。" }, { key:"ag", name:"アンジュルム" }, { key:"jj", name:"Juice=Juice" },
+    { key:"tf", name:"つばきファクトリー" }, { key:"by", name:"BEYOOOOONDS" }, { key:"on", name:"OCHA NORMA" },
+    { key:"rc", name:"ロージークロニクル" }, { key:"cu", name:"℃-ute" }, { key:"bz", name:"Berryz工房" },
+    { key:"cg", name:"カントリー・ガールズ" }, { key:"kf", name:"こぶしファクトリー" },
+  ];
+  const vgSel = document.getElementById("vg-select");
+  GROUPS.forEach(g=>{ const o=document.createElement("option"); o.value=g.key; o.textContent=g.name; vgSel.appendChild(o); });
+
+  let vCount = 10;
+  document.querySelectorAll("#vc-row .count-btn").forEach(b=>{
+    b.addEventListener("click",()=>{ document.querySelectorAll("#vc-row .count-btn").forEach(x=>x.classList.remove("selected")); b.classList.add("selected"); vCount = parseInt(b.dataset.c,10); });
+  });
+
+  let madeUrl = "";
+  document.getElementById("make-btn").addEventListener("click",()=>{
+    const group = vgSel.value;
+    const seed = Math.random().toString(36).slice(2,8); // 6文字のランダムなタネ
+    const rel = "quiz.html?cg=" + group + "&cn=" + vCount + "&cs=" + seed + "&ct=f&cl=" + encodeURIComponent("対戦");
+    madeUrl = new URL(rel, location.href).href; // 絶対URLにして共有しやすく
+    document.getElementById("link-input").value = madeUrl;
+    document.getElementById("link-box").style.display = "block";
+  });
+
+  document.getElementById("copy-btn").addEventListener("click", async ()=>{
+    try{ await navigator.clipboard.writeText(madeUrl); document.getElementById("copy-btn").textContent = "コピー済"; setTimeout(()=>{document.getElementById("copy-btn").textContent="コピー";},1500); }
+    catch(e){ document.getElementById("link-input").select(); }
+  });
+  document.getElementById("share-btn").addEventListener("click", async ()=>{
+    if(navigator.share){ try{ await navigator.share({ title:"ハロプロ早押しクイズ 対戦", text:"同じ問題で対戦しよう！", url:madeUrl }); }catch(e){} }
+    else { alert("この端末は共有に未対応です。リンクをコピーして送ってください。"); }
+  });
+  document.getElementById("play-btn").addEventListener("click",()=>{ if(madeUrl) location.href = madeUrl; });
+
+  // 初期描画（Firebase準備を待ってデイリーを表示）
+  if(window.HaroLBReady){ renderDaily(); }
+  else { window.addEventListener("harolb-ready", renderDaily, { once:true }); setTimeout(()=>{ if(!window.HaroLB) renderDaily(); }, 6000); }
+</script>
+</body>
+</html>

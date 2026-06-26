@@ -184,7 +184,20 @@
 <script type="module" src="leaderboard.js"></script>
 <!-- グループの曲データを動的に読み込み（キャッシュ回避のtoms付き） -->
 <script>
-  window.GKEY = (new URLSearchParams(location.search).get("group") || "jj").toLowerCase();
+  // 対戦/デイリーのパラメータ（cs=シードがあれば「対戦プレイ」）
+  var _sp = new URLSearchParams(location.search);
+  window.CHAL = null;
+  if(_sp.get("cs")){
+    window.CHAL = {
+      group: (_sp.get("cg") || "mix").toLowerCase(),                  // 出題プール
+      count: Math.max(3, Math.min(20, parseInt(_sp.get("cn") || "10", 10))), // 曲数
+      seed: _sp.get("cs"),                                            // 同一セットを再現するタネ
+      type: (_sp.get("ct") === "d") ? "d" : "f",                      // d=デイリー / f=友達対戦
+      label: _sp.get("cl") || ((_sp.get("ct") === "d") ? "今日のチャレンジ" : "対戦")
+    };
+  }
+  // 対戦時は出題プール(cg)を読み込む。通常時は ?group= を使う
+  window.GKEY = window.CHAL ? window.CHAL.group : ((_sp.get("group") || "jj").toLowerCase());
   if(!/^(jj|mm|ag|tf|by|on|rc|cu|bz|cg|kf|mix|all|weak)$/.test(window.GKEY)) window.GKEY = "jj";
   window.MIX_KEYS = ["mm","ag","jj","tf","by","on","rc"]; // 現役7グループ
   window.ALL_KEYS = window.MIX_KEYS.concat(["cu","bz","cg","kf"]); // 全11（OG含む）
@@ -227,6 +240,14 @@ function weakKeyOf(s){ return s.id || s.title; }
 function recordMiss(song){ const m=loadWeakMap(); const k=weakKeyOf(song); const e=m[k]||{id:song.id,title:song.title,uri:song.uri,image:song.image||"",album:song.album||"",miss:0}; e.miss=(e.miss||0)+1; e.last=Date.now(); m[k]=e; saveWeakMap(m); }
 function recordHit(song){ const m=loadWeakMap(); const k=weakKeyOf(song); if(m[k]){ m[k].miss-=1; if(m[k].miss<=0) delete m[k]; saveWeakMap(m); } }
 
+// ===== 対戦/デイリー用：シード値から決定論的に同じ問題セットを作る =====
+// 同じ seed と同じ曲リスト（順序）なら、誰がやっても全く同じ並びになる。
+function seedToInt(str){ let h=2166136261; for(let i=0;i<String(str).length;i++){ h^=str.charCodeAt(i); h=Math.imul(h,16777619); } return h>>>0; }
+function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function seededShuffle(arr, seedStr){ const rnd=mulberry32(seedToInt(seedStr)); const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+// 対戦ランキングのコレクションキー（HaroLBにgroupとして渡す）
+function challengeLbKey(){ return (CHAL.type === "d") ? ("daily_" + CHAL.seed) : ("chal_" + CHAL.group + "_" + CHAL.seed); }
+
 // 曲データ（MIXは現役全グループを結合。タイトル重複は除去）
 let SONGS;
 if (KEY === "weak") {
@@ -236,7 +257,7 @@ if (KEY === "weak") {
   const merged = [].concat(...keys.map((k) => window["SONGS_" + k.toUpperCase()] || []));
   const seen = new Set();
   SONGS = merged.filter((s) => { if (seen.has(s.title)) return false; seen.add(s.title); return true; });
-  SONGS = shuffle(SONGS); // グループ順の偏りをなくす
+  if(!window.CHAL) SONGS = shuffle(SONGS); // 通常時のみシャッフル（対戦時は全員同じ順序を保つ）
 } else {
   SONGS = window["SONGS_" + KEY.toUpperCase()] || [];
 }
@@ -313,11 +334,22 @@ document.querySelectorAll(".count-btn").forEach(btn=>{ btn.addEventListener("cli
 document.getElementById("start-btn").addEventListener("click",()=>{
   if(!SONGS||SONGS.length===0){alert("曲データが読み込めませんでした。");return;}
   initAudio();
-  questions=shuffle(SONGS).slice(0,questionCount);
+  // 対戦時はシードで決定論的に同じセットを作る。通常時はランダム
+  questions = window.CHAL ? seededShuffle(SONGS, CHAL.seed).slice(0, CHAL.count) : shuffle(SONGS).slice(0,questionCount);
   questionTitles=new Set(questions.map(q=>q.title));
   current=0; totalScore=0; streak=0; correctCount=0; updateStreakBadge();
   hide("screen-start"); show("screen-quiz"); loadQuestion();
 });
+
+/* ===== 対戦/デイリーのスタート画面調整 ===== */
+if(window.CHAL){
+  questionCount = CHAL.count;
+  document.getElementById("group-name").textContent = (CHAL.type === "d") ? "🗓️ デイリー" : "⚔️ 対戦";
+  document.querySelector(".subtitle").textContent = CHAL.label + "：全員同じ問題で勝負！";
+  const cr = document.querySelector(".count-row"); if(cr) cr.style.display = "none";
+  const lead = document.querySelector("#screen-start > p");
+  if(lead) lead.innerHTML = '<b style="color:#fff;">'+CHAL.count+'曲</b>の同じセットに挑戦。<br>準備ができたらスタート！';
+}
 
 /* ===== 苦手克服モードのスタート画面調整 ===== */
 if(KEY === "weak"){
@@ -423,7 +455,13 @@ function endGame(){
   if(rate>=0.9)rank="🏆 ハロプロ博士！"; else if(rate>=0.7)rank="🌟 かなりのファン！"; else if(rate>=0.4)rank="🎵 まずまず！"; else rank="🔰 これから覚えよう！";
   document.getElementById("final-rank").textContent=rank;
   const bestEl = document.getElementById("best-line");
-  if(KEY === "weak"){
+  if(window.CHAL){
+    // 対戦/デイリー：このセットの専用ランキングに登録して比較する
+    bestEl.textContent = `${CHAL.label}：あなたのスコア ${totalScore}`;
+    bestEl.classList.remove("new");
+    if(CHAL.type === "d") localStorage.setItem("haropro_daily_done", CHAL.seed); // デイリーは今日プレイ済みに
+    showLeaderboardBlock();
+  } else if(KEY === "weak"){
     // 苦手モードは練習扱い：成績保存もランキング登録もしない。残りの苦手曲数を表示
     const remain = loadWeakSongs().length;
     bestEl.textContent = remain > 0 ? `🔥 苦手曲 残り ${remain}曲` : "🎉 苦手曲をすべて克服！";
@@ -441,11 +479,22 @@ function endGame(){
 /* ===== オンラインランキング登録 ===== */
 const LB_NAME_KEY = "haropro_lb_name"; // 前回のニックネームを覚えておく
 let lbSubmitted = false;               // 同じゲームでの二重登録を防ぐ
+let lbTargetKey = KEY;                 // 登録先（通常はグループ。対戦時は対戦専用キー）
 
 function showLeaderboardBlock(){
   const block = document.getElementById("lb-block");
-  // 「ランキングを見る」リンクはこのグループ向けに
-  document.getElementById("lb-link").href = "leaderboard.html?group=" + KEY;
+  const titleEl = document.querySelector("#lb-block .lb-title");
+  const linkEl = document.getElementById("lb-link");
+  if(window.CHAL){
+    // 対戦/デイリー：このセット専用のランキングへ
+    lbTargetKey = challengeLbKey();
+    titleEl.textContent = (CHAL.type === "d") ? "🗓️ 今日のランキングに登録" : "⚔️ 対戦ランキングに登録";
+    linkEl.style.display = "none"; // 標準ランキングへのリンクは出さない
+  } else {
+    lbTargetKey = KEY;
+    titleEl.textContent = "🏆 オンラインランキングに登録";
+    linkEl.href = "leaderboard.html?group=" + KEY;
+  }
   // Firebaseの準備ができたらブロックを表示（できなければ非表示のまま＝端末内の成績だけ機能）
   function reveal(){
     block.classList.remove("hidden");
@@ -468,7 +517,7 @@ document.getElementById("lb-submit").addEventListener("click", async ()=>{
   const btn = document.getElementById("lb-submit");
   btn.disabled = true; status.textContent = "登録中…"; status.className = "lb-status";
   try{
-    await window.HaroLB.submit(KEY, name, totalScore);
+    await window.HaroLB.submit(lbTargetKey, name, totalScore);
     lbSubmitted = true;
     localStorage.setItem(LB_NAME_KEY, name.slice(0,12));
     status.textContent = "✅ 登録しました！"; status.className = "lb-status ok";
@@ -483,7 +532,7 @@ document.getElementById("lb-submit").addEventListener("click", async ()=>{
 async function showTop(myName){
   const box = document.getElementById("lb-top");
   try{
-    const rows = await window.HaroLB.top(KEY, 10);
+    const rows = await window.HaroLB.top(lbTargetKey, 10);
     box.innerHTML = rows.map((r,i)=>{
       // 名前はテキストとして安全に入れる（HTMLとして解釈させない）
       const nameEl = document.createElement("span"); nameEl.textContent = r.name || "（名無し）";
