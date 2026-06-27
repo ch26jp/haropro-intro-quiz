@@ -108,7 +108,10 @@
 <script>
   /* ===== 今日のチャレンジ（独立入口） ===== */
   (function(){
-    function todayStr(){ const d=new Date(); return ""+d.getFullYear()+String(d.getMonth()+1).padStart(2,"0")+String(d.getDate()).padStart(2,"0"); }
+    function todayStr(){ // JST(UTC+9)固定：端末のタイムゾーンに依存せず、全員が同じ「今日」になる（切替はJST 0:00）
+      const j = new Date(Date.now() + 9*3600000);
+      return "" + j.getUTCFullYear() + String(j.getUTCMonth()+1).padStart(2,"0") + String(j.getUTCDate()).padStart(2,"0");
+    }
     const DAILY_GROUP="mix", DAILY_COUNT=10;
     const today=todayStr();
     const done=(localStorage.getItem("haropro_daily_done")===today);
